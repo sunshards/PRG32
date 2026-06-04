@@ -3,10 +3,12 @@ FROM ubuntu:24.04
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
+# 1. Install system dependencies (Updated for both Hardware & QEMU Graphics)
 RUN apt-get update && apt-get install -y \
     git wget flex bison gperf python3 python3-venv python3-pip \
     cmake ninja-build ccache libffi-dev libssl-dev dfu-util \
     libusb-1.0-0 udev \
+    libsdl2-2.0-0 libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory to /root (equivalent to $HOME)
