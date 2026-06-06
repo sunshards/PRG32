@@ -192,8 +192,8 @@ static void check_terminal_keyboard_input(void) {
             case 's': active_mask |= PRG32_BTN_DOWN; break;
             case 'a': active_mask |= PRG32_BTN_LEFT; break;
             case 'd': active_mask |= PRG32_BTN_RIGHT; break;
-            case ' ': active_mask |= PRG32_BTN_A; break;
-            case 'b': active_mask |= PRG32_BTN_B; break;
+            case 'j': active_mask |= PRG32_BTN_A; break;
+            case 'k': active_mask |= PRG32_BTN_B; break;
             case '\r':
             case '\n': active_mask |= PRG32_BTN_START; break;
         }
