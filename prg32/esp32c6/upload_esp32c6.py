@@ -9,11 +9,14 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 import argparse
+from prg32.utilities.logging import *
 from prg32.utilities.env_variables import *
+from prg32.esp32c6.build_esp32c6 import reset_esp32c6
 
-def upload(args: argparse.Namespace) -> None:
+def upload_esp32c6(args: argparse.Namespace) -> None:
     data = Path(args.cartridge).read_bytes()
     endpoint = args.url.rstrip("/") + "/api/games?slot=" + args.slot
+    
     request = urllib.request.Request(
         endpoint,
         data=data,
@@ -28,3 +31,33 @@ def upload(args: argparse.Namespace) -> None:
         raise SystemExit(f"upload failed: HTTP {exc.code}: {body}") from exc
     except urllib.error.URLError as exc:
         raise SystemExit(f"upload failed: {exc}") from exc
+
+def run_esp32c6(args: argparse.Namespace) -> None:
+    # Construct the endpoint (e.g., http://192.168.4.1/api/games/select?slot=cart0)
+    endpoint = args.url.rstrip("/") + "/api/games/select?slot=" + args.slot
+    
+    # For a POST request with no body, data must be empty bytes b""
+    request = urllib.request.Request(
+        endpoint,
+        data=b"", 
+        method="POST"
+    )
+    
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            print(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", "replace")
+        raise SystemExit(f"Selection failed: HTTP {exc.code}: {body}") from exc
+    except urllib.error.URLError as exc:
+        raise SystemExit(f"Selection failed: {exc}") from exc
+    
+def upload_and_run_esp32c6(args: argparse.Namespace):
+    upload_esp32c6(args)
+    run_esp32c6(args)
+    log_ok("Finished upload and run on ESP32C6")
+
+def switch_cartridge_esp32c6(args: argparse.Namespace):
+    reset_esp32c6(args)
+    upload_and_run_esp32c6(args)
+    log_ok("Done switching cartridge in ESP32C6")

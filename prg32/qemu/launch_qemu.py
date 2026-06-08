@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 import os
+import argparse
+from pathlib import Path
 from prg32.utilities.env_variables import QEMU_IMAGE, QEMU_EFUSE
 from prg32.utilities.logging import *
-import argparse
 
 def launch_qemu(args: argparse.Namespace):
+    if not (Path := __import__('pathlib').Path)(QEMU_IMAGE).exists():
+        log_error(f"Cannot launch QEMU: {QEMU_IMAGE} image is missing.")
+        die("You have to build and flash QEMU before launch.")
+
     log_info("Launching QEMU")
     log_info("Press Ctrl + ] to exit")
     cmd = [
