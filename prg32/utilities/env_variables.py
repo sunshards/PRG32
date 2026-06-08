@@ -8,7 +8,11 @@ GAMES_DIR = "examples/games"
 PRG32_ENTRY = "prg32/prg32.py"
 
 # ESP32C6 environment variables
-ESP32C6_BUILD_DIR = "build"
+ESP32C6_BUILD_DIR = "build-esp32c6"
+ESP32C6_IMAGE = f"{ESP32C6_BUILD_DIR}/PRG32.bin"
+ESP32C6_ELF = f"{ESP32C6_BUILD_DIR}/PRG32.elf"
+ESP32C6_SDKCONFIG = f"{ESP32C6_BUILD_DIR}/sdkconfig"
+ESP32C6_SDKCONFIG_DEFAULTS = "sdkconfig.defaults"
 
 # QEMU environment variables
 QEMU_BUILD_DIR = "build-qemu"
@@ -18,10 +22,13 @@ QEMU_ELF = f"{QEMU_BUILD_DIR}/PRG32.elf"
 QEMU_SDKCONFIG= f"{QEMU_BUILD_DIR}/sdkconfig"
 QEMU_SDKCONFIG_DEFAULTS = "sdkconfig.defaults.qemu"
 
+# Metrics variables
+METRICS_SDKCONFIG_DEFAULTS = "sdkconfig.defaults.metrics"
+
 # Target Defaults
 TARGET_DEFAULTS = {
     "esp32c6": {
-        "firmware_elf": "build-esp32c6/firmware.elf",
+        "firmware_elf": ESP32C6_ELF,
         "build_dir" : ESP32C6_BUILD_DIR
     },
     "qemu": {
@@ -29,7 +36,6 @@ TARGET_DEFAULTS = {
         "build_dir": QEMU_BUILD_DIR
     }
 }
-
 
 # Cartridge and Partitions
 CART_HEADER = struct.Struct("<4sHHHHIIIIIII32s")
