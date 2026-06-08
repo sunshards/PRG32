@@ -227,7 +227,7 @@ void app_main(void) {
     uint32_t last_idle_log_ms = 0;
     uint32_t next_frame_ms = prg32_ticks_ms();
     while (1) {
-        // check_terminal_keyboard_input();
+        check_terminal_keyboard_input();
         uint32_t input_snapshot = prg32_controller_read();
 
         if (prg32_cart_is_loaded()) {
