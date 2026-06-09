@@ -44,7 +44,7 @@ All platforms need:
 - Python 3;
 - CMake;
 - Ninja;
-- an ESP-IDF 5.3 or newer toolchain with `esp32c3` and `esp32c6` installed;
+- an ESP-IDF 5.4 or newer toolchain with `esp32c3` and `esp32c6` installed;
 - `riscv32-esp-elf-gcc`, normally supplied by ESP-IDF;
 - a terminal where ESP-IDF has been exported before running `idf.py` or the
   cartridge builder.
@@ -72,7 +72,7 @@ ESP-IDF tools for both targets and source the ESP-IDF export script again.
 2. Install Visual Studio Code.
 3. Install the Espressif ESP-IDF extension if you want IDE integration.
 4. Download and run the Espressif ESP-IDF Tools Installer for Windows.
-5. Select ESP-IDF 5.3 or newer.
+5. Select ESP-IDF 5.4 or newer.
 6. Include both `esp32c3` and `esp32c6` tool support.
 7. Open the ESP-IDF PowerShell shortcut created by the installer.
 
@@ -131,7 +131,7 @@ Install ESP-IDF:
 
 ```bash
 cd "$HOME"
-git clone -b v5.3 --recursive https://github.com/espressif/esp-idf.git
+git clone -b v5.4 --recursive https://github.com/espressif/esp-idf.git
 cd esp-idf
 ./install.sh esp32c3,esp32c6
 . ./export.sh
@@ -166,7 +166,7 @@ Install ESP-IDF:
 
 ```bash
 cd "$HOME"
-git clone -b v5.3 --recursive https://github.com/espressif/esp-idf.git
+git clone -b v5.4 --recursive https://github.com/espressif/esp-idf.git
 cd esp-idf
 ./install.sh esp32c3,esp32c6
 . ./export.sh

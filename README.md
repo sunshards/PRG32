@@ -192,7 +192,7 @@ Recommended classroom path:
 Standalone ESP-IDF path:
 
 1. Download and run the Espressif ESP-IDF Tools Installer for Windows.
-2. Select an ESP-IDF 5.3 or newer release.
+2. Select an ESP-IDF 5.4 or newer release.
 3. Include support for `esp32c3` and `esp32c6`.
 4. Open the "ESP-IDF PowerShell" shortcut created by the installer.
 5. Clone and build PRG32 from that shell:

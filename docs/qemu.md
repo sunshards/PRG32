@@ -33,7 +33,7 @@ Espressif provides QEMU RISC-V packages for:
 - Linux x86_64
 - Linux arm64
 
-Use ESP-IDF 5.3 or newer; the `esp_lcd_qemu_rgb` component declares that
+Use ESP-IDF 5.4 or newer; the `esp_lcd_qemu_rgb` component declares that
 minimum IDF version. Install ESP-IDF first, then install QEMU:
 
 ```bash
