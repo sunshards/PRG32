@@ -27,7 +27,7 @@ game.prg32
 ```
 
 The firmware exports the PRG32 API addresses and the cartridge RAM address.
-`tools/prg32_game.py` links a game against those addresses and creates a
+`python3 -m prg32` links a game against those addresses and creates a
 `.prg32` package. The firmware validates the package, persists it in the chosen
 slot, loads any optional AUDIO block, copies code into executable cartridge RAM,
 and calls:
@@ -85,9 +85,9 @@ Build a cartridge from an assembly or C example. This example uses the firmware
 ELF from the local build to obtain the runtime addresses:
 
 ```bash
-python3 tools/prg32_game.py build \
+python3 -m prg32 build-cartridge \
   examples/games/asteroids/graphics/game.S \
-  --firmware-elf build-esp32c6/PRG32.elf \
+  --target esp32c6 \
   --entry-prefix asteroids_graphics \
   --name asteroids \
   --out build-esp32c6/asteroids.prg32
@@ -96,14 +96,14 @@ python3 tools/prg32_game.py build \
 Upload it to the board:
 
 ```bash
-python3 tools/prg32_game.py upload build-esp32c6/asteroids.prg32 --url http://192.168.4.1
+python3 -m prg32 esp32c6 upload-and-run build-esp32c6/asteroids.prg32 --url http://192.168.4.1
 ```
 
 The firmware stores the cartridge in `cart0` by default and starts running it
 from the main loop. Upload to `cart1` with:
 
 ```bash
-python3 tools/prg32_game.py upload build-esp32c6/asteroids.prg32 --slot cart1 --url http://192.168.4.1
+python3 -m prg32 esp32c6 upload-and-run build-esp32c6/asteroids.prg32 --slot cart1 --url http://192.168.4.1
 ```
 
 After reset, one stored cartridge starts automatically. When both slots contain
@@ -118,9 +118,9 @@ A cartridge opts in to multiplayer by calling
 can also mark the package header with `PRG32_CART_FLAG_MULTIPLAYER`:
 
 ```bash
-python3 tools/prg32_game.py build \
+python3 -m prg32 build-cartridge \
   examples/games/pong/c/game.c \
-  --firmware-elf build-esp32c6/PRG32.elf \
+  --target esp32c6 \
   --entry-prefix pong_c \
   --multiplayer \
   --name pong-mp \
@@ -142,7 +142,7 @@ If the board is already running and the host can reach its HTTP API, the build
 tool can query the runtime directly:
 
 ```bash
-python3 tools/prg32_game.py build \
+python3 -m prg32 build-cartridge \
   examples/games/asteroids/graphics/game.S \
   --runtime-url http://192.168.4.1 \
   --entry-prefix asteroids_graphics \
@@ -168,9 +168,9 @@ idf.py -B build-qemu -D SDKCONFIG=build-qemu/sdkconfig -D SDKCONFIG_DEFAULTS=sdk
 Build a cartridge against the QEMU firmware ELF:
 
 ```bash
-python3 tools/prg32_game.py build \
+python3 -m prg32 build-cartridge \
   examples/games/asteroids/graphics/game.S \
-  --firmware-elf build-qemu/PRG32.elf \
+  --target qemu \
   --entry-prefix asteroids_graphics \
   --name asteroids \
   --out build-qemu/asteroids.prg32
@@ -179,7 +179,7 @@ python3 tools/prg32_game.py build \
 Stage it into the QEMU flash image:
 
 ```bash
-python3 tools/prg32_game.py upload-qemu \
+python3 -m prg32 qemu upload \
   build-qemu/asteroids.prg32 \
   --flash build-qemu/qemu_flash.bin
 ```
@@ -228,13 +228,11 @@ workflow:
 
 ```bash
 # Physical board variant.
-python3 tools/prg32_game.py build ... \
-  --firmware-elf build-esp32c6/PRG32.elf \
+python3 -m prg32 build-cartridge ... \ --target esp32c6 \
   --out build-esp32c6/game.prg32
 
 # QEMU variant.
-python3 tools/prg32_game.py build ... \
-  --firmware-elf build-qemu/PRG32.elf \
+python3 -m prg32 build-cartridge ... \ --target qemu \
   --out build-qemu/game.prg32
 ```
 
@@ -259,7 +257,7 @@ Two installation paths are available:
 - On-device: enter setup, open `BROWSE STORE`, choose a compatible game, and
   download it into `cart0` or `cart1`.
 - Host tool: run `python3 tools/prg32_game.py store-download ...` and then
-  upload the downloaded `.prg32` with `python3 tools/prg32_game.py upload ...`.
+  upload the downloaded `.prg32` with `python3 -m prg32 esp32c6 upload-and-run ...`.
 
 ## HTTP API
 
@@ -356,9 +354,9 @@ Build them with the same tool. The builder detects `.c` sources and compiles
 them as small freestanding C modules:
 
 ```bash
-python3 tools/prg32_game.py build \
+python3 -m prg32 build-cartridge \
   examples/games/platformer/c/game.c \
-  --firmware-elf build-esp32c6/PRG32.elf \
+  --target esp32c6 \
   --entry-prefix platformer_c \
   --name platformer-c \
   --out build-esp32c6/platformer-c.prg32
@@ -389,9 +387,9 @@ python3 tools/prg32audio_pack.py audio.json --out build/audio.block
 Attach it to a cartridge:
 
 ```bash
-python3 tools/prg32_game.py build \
+python3 -m prg32 build-cartridge \
   examples/games/asteroids/graphics/game.S \
-  --firmware-elf build-esp32c6/PRG32.elf \
+  --target esp32c6 \
   --entry-prefix asteroids_graphics \
   --audio-block build/audio.block \
   --name asteroids-audio \

@@ -82,9 +82,9 @@ explain how `prg32_platform_actor_t` changes every frame.
 For assembly lessons:
 
 ```bash
-python3 tools/prg32_game.py build \
+python3 -m prg32 build-cartridge \
   examples/games/platformer/graphics/game.S \
-  --firmware-elf build-esp32c6/PRG32.elf \
+  --target esp32c6 \
   --entry-prefix platformer_graphics \
   --name platformer-asm \
   --out build-esp32c6/platformer-asm.prg32
@@ -93,9 +93,9 @@ python3 tools/prg32_game.py build \
 For C lessons:
 
 ```bash
-python3 tools/prg32_game.py build \
+python3 -m prg32 build-cartridge \
   examples/games/platformer/c/game.c \
-  --firmware-elf build-esp32c6/PRG32.elf \
+  --target esp32c6 \
   --entry-prefix platformer_c \
   --name platformer-c \
   --out build-esp32c6/platformer-c.prg32
@@ -104,7 +104,7 @@ python3 tools/prg32_game.py build \
 Upload either cartridge with:
 
 ```bash
-python3 tools/prg32_game.py upload build-esp32c6/platformer-c.prg32 --url http://192.168.4.1
+python3 -m prg32 esp32c6 upload-and-run build-esp32c6/platformer-c.prg32 --url http://192.168.4.1
 ```
 
 For QEMU
@@ -114,9 +114,9 @@ build against `build-qemu/PRG32.elf` and use `upload-qemu`.
 
 On Linux or MacOS:
 ```bash
-./scripts/qemu/build_qemu.sh
-./scripts/qemu/qemu_inject_cartridge.sh <path_to_cartridge.prg32>
-./scripts/qemu/launch_qemu.sh
+python3 -m prg32 qemu build-and-flash
+python3 -m prg32 qemu upload <path_to_cartridge.prg32>
+python3 -m prg32 qemu launch
 ```
 
 ## Comparing Assembly And C

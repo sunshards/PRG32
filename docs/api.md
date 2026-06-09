@@ -225,7 +225,7 @@ Parameters:
 Example with the host tool:
 
 ```bash
-python3 tools/prg32_game.py upload build/pong.prg32 \
+python3 -m prg32 esp32c6 upload-and-run build/pong.prg32 \
   --url http://192.168.4.1 \
   --slot cart0
 ```
@@ -625,7 +625,7 @@ Expected behavior:
 
 ## CartridgeStore Publishing API
 
-Publishing endpoints are used by `tools/prg32_game.py`. Stores may require a
+Publishing endpoints are used by `python3 -m prg32`. Stores may require a
 Bearer token.
 
 Default host config:
@@ -688,7 +688,7 @@ Tool example:
 ```bash
 python3 tools/prg32_game.py publish \
   examples/games/tetris/c/game.c \
-  --firmware-elf build-esp32c6/PRG32.elf \
+  --target esp32c6 \
   --entry-prefix tetris_c \
   --name tetris-c \
   --id org.uniparthenope.tetris-c \
@@ -863,12 +863,11 @@ field reference.
 ### Upload A Local Cartridge To A Board
 
 ```bash
-python3 tools/prg32_game.py build examples/games/pong/c/game.c \
-  --firmware-elf build-esp32c6/PRG32.elf \
+python3 -m prg32 build-cartridge examples/games/pong/c/game.c \ --target esp32c6 \
   --entry-prefix pong_c \
   --out build-esp32c6/pong.prg32
 
-python3 tools/prg32_game.py upload build-esp32c6/pong.prg32 \
+python3 -m prg32 esp32c6 upload-and-run build-esp32c6/pong.prg32 \
   --url http://192.168.4.1 \
   --slot cart0
 ```
@@ -878,7 +877,7 @@ python3 tools/prg32_game.py upload build-esp32c6/pong.prg32 \
 ```bash
 python3 tools/prg32_game.py publish \
   examples/games/tetris/c/game.c \
-  --firmware-elf build-esp32c6/PRG32.elf \
+  --target esp32c6 \
   --entry-prefix tetris_c \
   --name tetris-c \
   --id org.uniparthenope.tetris-c \
@@ -891,7 +890,7 @@ python3 tools/prg32_game.py store-download org.uniparthenope.tetris-c \
   --architecture esp32c6 \
   --out build-esp32c6/tetris-c.prg32
 
-python3 tools/prg32_game.py upload build-esp32c6/tetris-c.prg32 \
+python3 -m prg32 esp32c6 upload-and-run build-esp32c6/tetris-c.prg32 \
   --url http://192.168.4.1 \
   --slot cart0
 ```

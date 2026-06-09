@@ -80,7 +80,7 @@ idf.py -B build-qemu -D SDKCONFIG=build-qemu/sdkconfig -D SDKCONFIG_DEFAULTS=sdk
 On Linux or MacOS:
 ```bash
 cd <path_to_PRG32>
-./scripts/qemu/build_qemu.sh
+python3 -m prg32 qemu build-and-flash
 ```
 
 The second command builds the firmware if needed, starts QEMU, opens the virtual
@@ -141,9 +141,9 @@ flash image before starting QEMU:
 
 On Windows:
 ```bash
-python3 tools/prg32_game.py build \
+python3 -m prg32 build-cartridge \
   examples/games/asteroids/graphics/game.S \
-  --firmware-elf build-qemu/PRG32.elf \
+  --target qemu \
   --entry-prefix asteroids_graphics \
   --name asteroids \
   --out build-qemu/asteroids.prg32
@@ -152,7 +152,7 @@ If `build-qemu/qemu_flash.bin` does not exist yet, start QEMU once so ESP-IDF
 generates the flash image, quit QEMU, then run:
 
 ```bash
-python3 tools/prg32_game.py upload-qemu build-qemu/asteroids.prg32
+python3 -m prg32 qemu upload build-qemu/asteroids.prg32
 ```
 
 Then run `PRG32: qemu screen`.
@@ -164,14 +164,14 @@ generates the flash image:
 
 ```bash
 cd <path_to_PRG32>
-./scripts/qemu/build_qemu.sh
+python3 -m prg32 qemu build-and-flash
 ```
 
 Then stage the cartridge:
 ```bash
 cd <path_to_PRG32>
-./scripts/qemu/qemu_inject_cartridge.sh <path_to_cartridge.prg32>
-./scripts/qemu/launch_qemu.sh
+python3 -m prg32 qemu upload <path_to_cartridge.prg32>
+python3 -m prg32 qemu launch
 ```
 
 ## Wiring the game into QEMU
@@ -188,8 +188,8 @@ idf.py -B build-qemu -D SDKCONFIG=build-qemu/sdkconfig -D SDKCONFIG_DEFAULTS=sdk
 On Linux or MacOS:
 ```bash
 cd <path_to_PRG32>
-./scripts/qemu/build_qemu.sh
-./scripts/qemu/lauch_qemu.sh
+python3 -m prg32 qemu build-and-flash
+python3 -m prg32 qemu launch
 ```
 
 The same source can later be built for the physical board:

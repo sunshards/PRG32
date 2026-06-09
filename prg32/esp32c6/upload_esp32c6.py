@@ -11,7 +11,6 @@ from pathlib import Path
 import argparse
 from prg32.utilities.logging import *
 from prg32.utilities.env_variables import *
-from prg32.esp32c6.build_esp32c6 import reset_esp32c6
 
 def upload_esp32c6(args: argparse.Namespace) -> None:
     data = Path(args.cartridge).read_bytes()
@@ -56,8 +55,3 @@ def upload_and_run_esp32c6(args: argparse.Namespace):
     upload_esp32c6(args)
     run_esp32c6(args)
     log_ok("Finished upload and run on ESP32C6")
-
-def switch_cartridge_esp32c6(args: argparse.Namespace):
-    reset_esp32c6(args)
-    upload_and_run_esp32c6(args)
-    log_ok("Done switching cartridge in ESP32C6")

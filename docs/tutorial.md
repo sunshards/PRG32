@@ -196,9 +196,9 @@ Suggested order:
 After the resident firmware has been flashed once, build the game as a cartridge:
 
 ```bash
-python3 tools/prg32_game.py build \
+python3 -m prg32 build-cartridge \
   examples/games/pong/graphics/game.S \
-  --firmware-elf build-esp32c6/PRG32.elf \
+  --target esp32c6 \
   --entry-prefix pong_graphics \
   --name pong \
   --out build-esp32c6/pong.prg32
@@ -207,7 +207,7 @@ python3 tools/prg32_game.py build \
 Connect to the `PRG32` Wi-Fi network, then upload:
 
 ```bash
-python3 tools/prg32_game.py upload build-esp32c6/pong.prg32 --url http://192.168.4.1
+python3 -m prg32 esp32c6 upload-and-run build-esp32c6/pong.prg32 --url http://192.168.4.1
 ```
 
 Use `docs/cartridges.md` for the full workflow.

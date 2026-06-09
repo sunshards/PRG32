@@ -126,7 +126,7 @@ idf.py -B build-qemu \
 
 On Linux or MacOS:
 ```bash
-./scripts/qemu/build_qemu.sh
+python3 -m prg32 qemu build-and-flash
 ```
 
 Wait until the runtime splash and setup screen are visible. Note the IP address
@@ -144,7 +144,7 @@ runtime network mode you selected.
 Use the same cartridge build command for every run in the series. Example:
 
 ```bash
-python3 tools/prg32_game.py build \
+python3 -m prg32 build-cartridge \
   examples/games/pong/graphics/game.S \
   --firmware-elf build-esp32c6-metrics/PRG32.elf \
   --entry-prefix pong_graphics \
@@ -155,7 +155,7 @@ python3 tools/prg32_game.py build \
 Upload it to the board:
 
 ```bash
-python3 tools/prg32_game.py upload \
+python3 -m prg32 esp32c6 upload-and-run \
   build-esp32c6-metrics/pong.prg32 \
   --url http://192.168.4.1
 ```
@@ -164,15 +164,15 @@ For QEMU:
 
 On Windows:
 ```bash
-python3 tools/prg32_game.py upload-qemu \
+python3 -m prg32 qemu upload \
   build-qemu/pong.prg32 \
   --flash build-qemu/qemu_flash.bin
 ```
 
 On Linux or MacOS:
 ```bash
-./scripts/qemu/qemu_inject_cartridge.sh <path_to_cartridge.prg32>
-./scripts/qemu/launch_qemu.sh
+python3 -m prg32 qemu upload <path_to_cartridge.prg32>
+python3 -m prg32 qemu launch
 ```
 
 ## 7. Run The Measurement

@@ -32,7 +32,7 @@ idf.py -B build-esp32c6 -D SDKCONFIG=build-esp32c6/sdkconfig -D SDKCONFIG_DEFAUL
 idf.py -B build-esp32c6 -D SDKCONFIG=build-esp32c6/sdkconfig -D SDKCONFIG_DEFAULTS=sdkconfig.defaults flash monitor
 
 # 5) Build QEMU firmware
-./scripts/qemu/build_qemu.sh
+python3 -m prg32 qemu build-and-flash
 ```
 
 Open a second terminal (source ESP-IDF again), then stage a demo cartridge:
@@ -40,13 +40,13 @@ Open a second terminal (source ESP-IDF again), then stage a demo cartridge:
 ```bash
 cd <path_to_PRG32>
 . $HOME/esp-idf/export.sh
-python3 tools/prg32_game.py build \
+python3 -m prg32 build-cartridge \
   examples/games/asteroids/graphics/game.S \
-  --firmware-elf build-qemu/PRG32.elf \
+  --target qemu \
   --entry-prefix asteroids_graphics \
   --name asteroids \
   --out build-qemu/asteroids.prg32
-python3 tools/prg32_game.py upload-qemu build-qemu/asteroids.prg32 --flash build-qemu/qemu_flash.bin
+python3 -m prg32 qemu upload build-qemu/asteroids.prg32
 ```
 
 Run everything with one command next time:
@@ -291,7 +291,7 @@ pio device monitor -b 115200
 QEMU path:
 
 ```bash
-./scripts/qemu/build_qemu.sh
+python3 -m prg32 qemu build-and-flash
 ```
 
 Linux notes:
@@ -390,7 +390,7 @@ download server is the standalone **Cartridge Store** in
   cartridge is too large. Run QEMU once, then rerun `upload-qemu`.
 - `riscv32-esp-elf-gcc` missing: re-run `./install.sh esp32c3,esp32c6` and
   source the ESP-IDF export script.
-- Partition mismatch errors: run `tools/prg32_game.py doctor` and verify
+- Partition mismatch errors: run `python3 -m prg32 doctor` and verify
   `partitions_prg32.csv` plus the selected cartridge slot.
 
 ## Learning Path
@@ -555,7 +555,7 @@ See [docs/assets.md](docs/assets.md).
 - Doctor check:
 
 ```bash
-python3 tools/prg32_game.py doctor
+python3 -m prg32 doctor
 ```
 
 - One-shot QEMU demo:
@@ -607,7 +607,7 @@ See `docs/images/README.md` for capture instructions.
 - `main`: default firmware app
 - `examples/games`: assembly and C game demos
 - `examples/features`: focused firmware feature demos
-- `tools/prg32_game.py`: cartridge tooling
+- `python3 -m prg32 build-cartridge`: cartridge tooling
 - `tools/prg32_image_convert.py`: image and animation converter
 - `tools/prg32_audio_convert.py`: sample and MIDI converter
 - `tools/prg32audio_pack.py`: AUDIO block packer

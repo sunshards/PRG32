@@ -171,7 +171,7 @@ idf.py -B build-qemu -D SDKCONFIG=build-qemu/sdkconfig -D SDKCONFIG_DEFAULTS=sdk
 
 On Linux or MacOS:
 ```bash
-./scripts/qemu/build_qemu.sh
+python3 -m prg32 qemu build-and-flash
 ```
 
 QEMU is best for:

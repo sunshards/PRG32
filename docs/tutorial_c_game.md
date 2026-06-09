@@ -115,7 +115,7 @@ idf.py -B build-qemu -D SDKCONFIG=build-qemu/sdkconfig -D SDKCONFIG_DEFAULTS=sdk
 
 On Linux or MacOS:
 ```bash
-./scripts/qemu/build_qemu.sh
+python3 -m prg32 qemu build-and-flash
 ```
 
 Restore the default `main/CMakeLists.txt` and `main/main.c` after the lab.
@@ -125,9 +125,9 @@ Restore the default `main/CMakeLists.txt` and `main/main.c` after the lab.
 After the resident firmware is built, package the same C source as a cartridge:
 
 ```bash
-python3 tools/prg32_game.py build \
+python3 -m prg32 build-cartridge \
   examples/games/pong/c/game.c \
-  --firmware-elf build-esp32c6/PRG32.elf \
+  --target esp32c6 \
   --entry-prefix pong_c \
   --name pong-c \
   --out build-esp32c6/pong-c.prg32
@@ -136,7 +136,7 @@ python3 tools/prg32_game.py build \
 Upload to the board:
 
 ```bash
-python3 tools/prg32_game.py upload build-esp32c6/pong-c.prg32 --url http://192.168.4.1
+python3 -m prg32 esp32c6 upload-and-run build-esp32c6/pong-c.prg32 --url http://192.168.4.1
 ```
 
 For QEMU
@@ -146,9 +146,9 @@ build against `build-qemu/PRG32.elf` and stage with `upload-qemu`
 
 On Linux or MacOS:
 ```bash
-./scripts/qemu/build_qemu.sh
-./scripts/qemu/qemu_inject_cartridge.sh <path_to_cartridge.prg32>
-./scripts/qemu/launch_qemu.sh```
+python3 -m prg32 qemu build-and-flash
+python3 -m prg32 qemu upload <path_to_cartridge.prg32>
+python3 -m prg32 qemu launch```
 
 ## 6. Move to Tiles and Platform Games
 

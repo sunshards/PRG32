@@ -73,12 +73,6 @@ def main(argv: list[str]) -> int:
     p = esp32c6_sub.add_parser("reset", help=f"erase flash and re-flash {ESP32C6_IMAGE} to ESP32C6 over USB")
     p.set_defaults(func=reset_esp32c6)
 
-    p = esp32c6_sub.add_parser("switch-cartridge", help=f"switch already running cartridge with a different one on the ESP32C6 over USB and HTTP")
-    p.add_argument("cartridge")
-    p.add_argument("--url", default="http://192.168.4.1")
-    p.add_argument("--slot", default=DEFAULT_CART_SLOT)
-    p.set_defaults(func=switch_cartridge_esp32c6)
-
     # ==========================================
     # 'qemu' Subcommand Menu
     # ==========================================
