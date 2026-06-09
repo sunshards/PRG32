@@ -50,7 +50,7 @@ def build_qemu_firmware():
 def generate_flash_image():
     step("Generating QEMU flash image")
     cwd = Path(BUILD_DIR)
-    subprocess.check_call([sys.executable, "-m", "esptool", "--chip=esp32c3", "merge_bin", "--output=flash_image.bin", "--fill-flash-size=4MB", "@flash_args"], cwd=str(cwd))
+    subprocess.check_call([sys.executable, "-m", "esptool", "--chip=esp32c3", "merge_bin", "--output=qemu_flash.bin", "--fill-flash-size=4MB", "@flash_args"], cwd=str(cwd))
 
 
 def run_qemu():

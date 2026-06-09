@@ -16,7 +16,7 @@ ESP32C6_SDKCONFIG_DEFAULTS = "sdkconfig.defaults"
 
 # QEMU environment variables
 QEMU_BUILD_DIR = "build-qemu"
-QEMU_IMAGE = f"{QEMU_BUILD_DIR}/flash_image.bin"
+QEMU_IMAGE = f"{QEMU_BUILD_DIR}/qemu_flash.bin"
 QEMU_EFUSE = f"{QEMU_BUILD_DIR}/qemu_efuse.bin"
 QEMU_ELF = f"{QEMU_BUILD_DIR}/PRG32.elf"
 QEMU_SDKCONFIG= f"{QEMU_BUILD_DIR}/sdkconfig"

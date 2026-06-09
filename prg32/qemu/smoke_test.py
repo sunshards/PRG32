@@ -72,11 +72,11 @@ def main():
     except Exception:
         log_error("qemu-launch-check failed (non-blocking)")
 
-    if not Path(f"{QEMU_BUILD_DIR}/flash_image.bin").exists():
+    if not Path(f"{QEMU_BUILD_DIR}/qemu_flash.bin").exists():
         log_error("qemu-flash-image missing (run QEMU once with build-qemu/sdkconfig)")
     log_ok("qemu-flash-image")
 
-    run_step("stage-cartridge-qemu", sys.executable, PRG32_ENTRY, "upload-qemu", f"{QEMU_BUILD_DIR}/pong.prg32", "--flash", f"{QEMU_BUILD_DIR}/flash_image.bin")
+    run_step("stage-cartridge-qemu", sys.executable, PRG32_ENTRY, "upload-qemu", f"{QEMU_BUILD_DIR}/pong.prg32", "--flash", f"{QEMU_BUILD_DIR}/qemu_flash.bin")
     log_ok("smoke-test-complete")
     print("=== SMOKE TEST PASSED ===")
 

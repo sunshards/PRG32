@@ -12,7 +12,7 @@ def main():
     DEMO_SOURCE = "examples/games/asteroids/graphics/game.S"
     DEMO_PREFIX = "asteroids_graphics"
     DEMO_CART = f"{QEMU_BUILD_DIR}/asteroids.prg32"
-    DEMO_FLASH = f"{QEMU_BUILD_DIR}/flash_image.bin"
+    DEMO_FLASH = f"{QEMU_BUILD_DIR}/qemu_flash.bin"
 
     def require_cmd(cmd, hint):
         from shutil import which
