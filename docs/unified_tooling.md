@@ -102,6 +102,57 @@ python3 -m prg32 runtime
 
 This will print the loaded cartridge load address, ABI version, RAM size, and PRG32 API import addresses.
 
+## 5. CartridgeStore and Metadata Tooling
+
+The unified tooling now includes a dedicated `store` subcommand to handle all metadata appending and CartridgeStore integrations. This replaces the old `tools/prg32_game.py` standalone metadata commands.
+
+### Metadata Management
+You can append the required `prg32-metadata-1.0` JSON and assets to a compiled cartridge, or inspect an existing cartridge's metadata:
+
+```bash
+# Attach metadata and assets to a built cartridge
+python3 -m prg32 store attach-metadata build-esp32c6/asteroids.prg32 \
+  --out build-esp32c6/asteroids_meta.prg32 \
+  --metadata metadata.json \
+  --icon icon.png
+
+# Inspect metadata trailer
+python3 -m prg32 store inspect-metadata build-esp32c6/asteroids_meta.prg32
+```
+
+### CartridgeStore Discovery and Downloading
+To browse or download games from a local or remote CartridgeStore:
+
+```bash
+# Discover local CartridgeStore instances via mDNS
+python3 -m prg32 store discover --timeout 3
+
+# List available cartridges on a specific store
+python3 -m prg32 store list --store-url http://192.168.1.100:5080
+
+# Download a specific game
+python3 -m prg32 store download org.prg32.asteroids \
+  --store-url http://192.168.1.100:5080 \
+  --architecture esp32c6 \
+  --out downloaded_asteroids.prg32
+```
+
+### Publishing
+Publishing bundles cartridges and their metadata together and uploads them to a store:
+
+```bash
+# Build, pack, and publish directly
+python3 -m prg32 store publish examples/games/asteroids/graphics/game.S \
+  --name asteroids \
+  --entry-prefix asteroids_graphics \
+  --firmware-elf build-esp32c6/PRG32.elf \
+  --store-url http://192.168.1.100:5080
+
+# Alternatively, pack a zip bundle and publish it
+python3 -m prg32 store pack-bundle --manifest manifest.json --out bundle.zip
+python3 -m prg32 store publish-bundle bundle.zip --store-url http://192.168.1.100:5080
+```
+
 ## Summary of Commands
 
 Here is a quick reference table of the old vs new workflows:

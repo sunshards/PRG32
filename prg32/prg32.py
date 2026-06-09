@@ -11,12 +11,17 @@ from prg32.utilities.runtime_handler import runtime
 from prg32.cartridge.build_cartridge import build_cartridge_cli
 
 from prg32.esp32c6.build_esp32c6 import set_target_esp32c6, build_esp32c6, flash_esp32c6, build_and_flash_esp32c6, reset_esp32c6, erase_flash_esp32c6
-from prg32.esp32c6.upload_esp32c6 import upload_esp32c6, run_esp32c6, upload_and_run_esp32c6, switch_cartridge_esp32c6
+from prg32.esp32c6.upload_esp32c6 import upload_esp32c6, run_esp32c6, upload_and_run_esp32c6
 
 
 from prg32.qemu.launch_qemu import launch_qemu
 from prg32.qemu.upload_qemu import upload_qemu
 from prg32.qemu.build_qemu import build_qemu, flash_qemu, build_and_flash_qemu, set_target_qemu
+
+from prg32.store.metadata import attach_metadata, inspect_metadata
+from prg32.store.store_api import store_discover, store_list, store_download
+from prg32.store.publish import publish, pack_bundle, publish_bundle
+from prg32.store.utils import ARCHITECTURE_PROFILES
 
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -139,6 +144,83 @@ def main(argv: list[str]) -> int:
     target_group.add_argument("--firmware-elf", help="Path to custom firmware ELF")
 
     p.set_defaults(func=build_cartridge_cli)
+
+    # ==========================================
+    # 'store' Subcommand Menu
+    # ==========================================
+    store_p = sub.add_parser("store", help="CartridgeStore and metadata tasks")
+    store_sub = store_p.add_subparsers(dest="sub_cmd", required=True)
+
+    p = store_sub.add_parser(
+        "attach-metadata",
+        help="append or replace a PRG32META metadata trailer",
+    )
+    p.add_argument("cartridge")
+    p.add_argument("--out", required=True)
+    p.add_argument("--metadata", required=True, help="prg32-metadata-1.0 JSON")
+    p.add_argument("--icon", required=True, help="PNG or JPEG icon image")
+    p.add_argument("--screenshot", help="optional PNG or JPEG screenshot image")
+    p.add_argument("--signature", help="optional signature bytes or JSON object")
+    p.add_argument("--colophon", help="optional prg32-colophon-1.0 JSON")
+    p.add_argument(
+        "--architecture",
+        choices=sorted(ARCHITECTURE_PROFILES),
+        help="cartridge architecture variant recorded in metadata.runtime",
+    )
+    p.set_defaults(func=attach_metadata)
+
+    p = store_sub.add_parser(
+        "inspect-metadata",
+        help="print the PRG32META trailer summary for a cartridge",
+    )
+    p.add_argument("cartridge")
+    p.set_defaults(func=inspect_metadata)
+
+    p = store_sub.add_parser("discover", help="find CartridgeStore instances with mDNS")
+    p.add_argument("--timeout", type=float, default=5)
+    p.set_defaults(func=store_discover)
+
+    p = store_sub.add_parser("list", help="list cartridges from a CartridgeStore")
+    p.add_argument("--store-url")
+    p.add_argument("--architecture", choices=sorted(ARCHITECTURE_PROFILES))
+    p.set_defaults(func=store_list)
+
+    p = store_sub.add_parser("download", help="download a cartridge from a CartridgeStore")
+    p.add_argument("game_id")
+    p.add_argument("--store-url")
+    p.add_argument("--architecture", required=True, choices=sorted(ARCHITECTURE_PROFILES))
+    p.add_argument("--version")
+    p.add_argument("--out", required=True)
+    p.set_defaults(func=store_download)
+
+    p = store_sub.add_parser("publish", help="build and publish a cartridge bundle")
+    p.add_argument("source")
+    p.add_argument("--firmware-elf", required=True)
+    p.add_argument("--entry-prefix", required=True)
+    p.add_argument("--name", required=True)
+    p.add_argument("--store-url")
+    p.add_argument("--architecture", choices=sorted(ARCHITECTURE_PROFILES))
+    p.add_argument("--id")
+    p.add_argument("--version", default="1.0.0")
+    p.add_argument("--summary")
+    p.add_argument("--tags")
+    p.add_argument("--icon")
+    p.add_argument("--splash")
+    p.add_argument("--colophon")
+    p.add_argument("--token")
+    p.set_defaults(func=publish)
+
+    p = store_sub.add_parser("pack-bundle", help="pack a flat CartridgeStore zip bundle")
+    p.add_argument("--manifest", required=True)
+    p.add_argument("--out", required=True)
+    p.set_defaults(func=pack_bundle)
+
+    p = store_sub.add_parser("publish-bundle", help="publish a CartridgeStore zip bundle")
+    p.add_argument("bundle")
+    p.add_argument("--store-url")
+    p.add_argument("--token")
+    p.set_defaults(func=publish_bundle)
+
 
     p = sub.add_parser("doctor", help="check local toolchain prerequisites")
     p.add_argument("--partitions", default=str(DEFAULT_PARTITION_TABLE))

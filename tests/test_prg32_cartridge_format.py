@@ -9,7 +9,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-TOOL_PATH = ROOT / "tools" / "prg32_cartridge_format.py"
+TOOL_PATH = ROOT / "prg32" / "store" / "cartridge_format.py"
 
 
 def load_tool():
