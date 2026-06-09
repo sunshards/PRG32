@@ -482,7 +482,7 @@ configured URL.
 Host-side example:
 
 ```bash
-python3 tools/prg32_game.py store-discover
+python3 -m prg32 store discover
 ```
 
 ### Well-Known Discovery Document
@@ -530,7 +530,7 @@ GET /api/games
 Example:
 
 ```bash
-python3 tools/prg32_game.py store-list \
+python3 -m prg32 store list \
   --store-url http://192.168.1.42:5080
 ```
 
@@ -602,7 +602,7 @@ Parameters:
 Example:
 
 ```bash
-python3 tools/prg32_game.py store-download org.uniparthenope.tetris-c \
+python3 -m prg32 store download org.uniparthenope.tetris-c \
   --store-url http://192.168.1.42:5080 \
   --architecture esp32c6 \
   --out build-esp32c6/tetris-c.prg32
@@ -686,7 +686,7 @@ Manifest example:
 Tool example:
 
 ```bash
-python3 tools/prg32_game.py publish \
+python3 -m prg32 store publish \
   examples/games/tetris/c/game.c \
   --target esp32c6 \
   --entry-prefix tetris_c \
@@ -718,11 +718,11 @@ bundle=<zip file>
 Tool example:
 
 ```bash
-python3 tools/prg32_game.py pack-bundle \
+python3 -m prg32 store pack-bundle \
   --manifest build-esp32c6/tetris-bundle/manifest.json \
   --out tetris.zip
 
-python3 tools/prg32_game.py publish-bundle tetris.zip \
+python3 -m prg32 store publish-bundle tetris.zip \
   --store-url http://192.168.1.42:5080
 ```
 
@@ -875,7 +875,7 @@ python3 -m prg32 esp32c6 upload-and-run build-esp32c6/pong.prg32 \
 ### Publish Then Install From CartridgeStore
 
 ```bash
-python3 tools/prg32_game.py publish \
+python3 -m prg32 store publish \
   examples/games/tetris/c/game.c \
   --target esp32c6 \
   --entry-prefix tetris_c \
@@ -885,7 +885,7 @@ python3 tools/prg32_game.py publish \
   --architecture esp32c6 \
   --store-url http://192.168.1.42:5080
 
-python3 tools/prg32_game.py store-download org.uniparthenope.tetris-c \
+python3 -m prg32 store download org.uniparthenope.tetris-c \
   --store-url http://192.168.1.42:5080 \
   --architecture esp32c6 \
   --out build-esp32c6/tetris-c.prg32

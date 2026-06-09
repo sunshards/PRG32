@@ -104,7 +104,7 @@ This will print the loaded cartridge load address, ABI version, RAM size, and PR
 
 ## 5. CartridgeStore and Metadata Tooling
 
-The unified tooling now includes a dedicated `store` subcommand to handle all metadata appending and CartridgeStore integrations. This replaces the old `tools/prg32_game.py` standalone metadata commands.
+The unified tooling now includes a dedicated `store` subcommand to handle all metadata appending and CartridgeStore integrations. This replaces the old `python3 -m prg32` standalone metadata commands.
 
 ### Metadata Management
 You can append the required `prg32-metadata-1.0` JSON and assets to a compiled cartridge, or inspect an existing cartridge's metadata:
@@ -145,7 +145,7 @@ Publishing bundles cartridges and their metadata together and uploads them to a 
 python3 -m prg32 store publish examples/games/asteroids/graphics/game.S \
   --name asteroids \
   --entry-prefix asteroids_graphics \
-  --firmware-elf build-esp32c6/PRG32.elf \
+  --target esp32c6 \
   --store-url http://192.168.1.100:5080
 
 # Alternatively, pack a zip bundle and publish it

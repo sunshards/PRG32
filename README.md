@@ -537,16 +537,16 @@ for a step-by-step scientific-paper measurement workflow with screenshots.
 - `tools/midi2prg32audio.py`: convert simple MIDI notes to tracker JSON.
 - `tools/prg32audio_pack.py`: pack samples, instruments, and tracks into an
   AUDIO block for `.prg32` cartridges.
-- `tools/prg32_game.py attach-metadata`: append a deterministic `PRG32META`
+- `python3 -m prg32 store attach-metadata`: append a deterministic `PRG32META`
   trailer for Cartridge Store publishing.
-- `tools/prg32_game.py inspect-metadata`: inspect metadata, assets, signature,
+- `python3 -m prg32 store inspect-metadata`: inspect metadata, assets, signature,
   colophon, and unknown trailer blocks.
-- `tools/prg32_game.py store-discover`: find CartridgeStore instances via mDNS.
-- `tools/prg32_game.py store-list`: print a CartridgeStore catalog table.
-- `tools/prg32_game.py store-download`: download a `.prg32` from a store.
-- `tools/prg32_game.py publish`: build a cartridge and submit a store bundle.
-- `tools/prg32_game.py pack-bundle`: create a flat multi-architecture zip.
-- `tools/prg32_game.py publish-bundle`: submit a prepared bundle.
+- `python3 -m prg32 store discover`: find CartridgeStore instances via mDNS.
+- `python3 -m prg32 store list`: print a CartridgeStore catalog table.
+- `python3 -m prg32 store download`: download a `.prg32` from a store.
+- `python3 -m prg32 store publish`: build a cartridge and submit a store bundle.
+- `python3 -m prg32 store pack-bundle`: create a flat multi-architecture zip.
+- `python3 -m prg32 store publish-bundle`: submit a prepared bundle.
 
 See [docs/assets.md](docs/assets.md).
 

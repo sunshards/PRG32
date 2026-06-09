@@ -206,7 +206,7 @@ signature, and an optional colophon.
 Create the executable cartridge first, then append metadata:
 
 ```bash
-python3 tools/prg32_game.py attach-metadata \
+python3 -m prg32 store attach-metadata \
   build-esp32c6/asteroids.prg32 \
   --metadata metadata.json \
   --icon icon.png \
@@ -219,7 +219,7 @@ python3 tools/prg32_game.py attach-metadata \
 Inspect the trailer:
 
 ```bash
-python3 tools/prg32_game.py inspect-metadata dist/asteroids-esp32c6.prg32
+python3 -m prg32 store inspect-metadata dist/asteroids-esp32c6.prg32
 ```
 
 A `.prg32` artifact contains one linked cartridge architecture. Build and
@@ -256,7 +256,7 @@ Two installation paths are available:
 
 - On-device: enter setup, open `BROWSE STORE`, choose a compatible game, and
   download it into `cart0` or `cart1`.
-- Host tool: run `python3 tools/prg32_game.py store-download ...` and then
+- Host tool: run `python3 -m prg32 store download ...` and then
   upload the downloaded `.prg32` with `python3 -m prg32 esp32c6 upload-and-run ...`.
 
 ## HTTP API
