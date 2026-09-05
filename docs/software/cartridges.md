@@ -398,7 +398,7 @@ python3 tools/capture_cartridge_previews.py
 ```
 
 The recorder stages each cartridge into an isolated flash copy, runs it in
-Espressif QEMU, captures 30 seconds from the 320×200 SDL playfield, records the
+Espressif QEMU, continuously captures 30 seconds from the 320×200 SDL playfield, records the
 firmware's 22050 Hz UART PCM stream, and sends scripted controls for visible
 gameplay. Poing uses its compact QEMU core image during capture because its
 catalog artwork and metadata are irrelevant to execution and can exhaust the

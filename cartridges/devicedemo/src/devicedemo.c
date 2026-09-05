@@ -11,7 +11,6 @@
 #define C_LIME 0x87e0u
 #define ARRAY_LEN(x) (sizeof(x)/sizeof((x)[0]))
 
-typedef void (*page_draw_fn)(uint32_t now, uint32_t input);
 static uint8_t g_page;
 static uint32_t g_prev_input;
 static uint32_t g_pressed;
@@ -34,9 +33,7 @@ static const uint8_t indexed_pixels[128] = {
   0x01,0x22,0x99,0x99,0x99,0x99,0x22,0x10, 0x00,0x12,0x22,0x22,0x22,0x21,0x10,0x00,
   0x00,0x00,0x11,0x11,0x11,0x11,0x00,0x00, 0x00,0x00,0x00,0x11,0x11,0x00,0x00,0x00
 };
-static const prg32_indexed_sprite_t indexed_sprite = {
-  indexed_pixels, palette16, 16,16,1,16, PRG32_SPRITE_BPP_4, 0
-};
+static prg32_indexed_sprite_t indexed_sprite;
 
 /* Four 8x8 1-bpp planes stored sequentially; the first two are used for 2-bpp demo. */
 static const uint8_t bitplane_pixels[32] = {
@@ -46,9 +43,7 @@ static const uint8_t bitplane_pixels[32] = {
   0x00,0x7e,0x42,0x5a,0x5a,0x42,0x7e,0x00
 };
 static const uint16_t bitplane_palette[4] = {0x0000,0x07ff,0xffe0,0xffff};
-static const prg32_indexed_sprite_t bitplane_sprite = {
-  bitplane_pixels, bitplane_palette, 8,8,1,4, PRG32_SPRITE_BPP_2, 0
-};
+static prg32_indexed_sprite_t bitplane_sprite;
 
 static const uint8_t tile_checker[8] = {0xaa,0x55,0xaa,0x55,0xaa,0x55,0xaa,0x55};
 static const uint8_t tile_star[8] = {0x18,0x18,0x7e,0x3c,0x7e,0x18,0x24,0x42};
@@ -167,10 +162,44 @@ static void page_services(uint32_t now,uint32_t input){
   text(8,126,"Demo reads state only; it does not reconfigure networking.",C_GRAY);
   text(8,144,"Firmware also provides multiplayer through prg32_multiplayer.h.",C_LIME);
 }
-static page_draw_fn pages[]={page_overview,page_input,page_primitives,page_indexed,page_bitplanes,page_tiles,page_platform,page_synth,page_audio_legacy,page_system,page_services};
-static const char *page_names[]={"overview","input","primitives","indexed","bitplanes","playfield","platform","synth","audio","memory","services"};
+#define PAGE_COUNT 11
+
+/* Portable cartridges can be loaded at a runtime address different from the
+ * builder's link address. Keep dispatch PC-relative instead of storing absolute
+ * code/string pointers in cartridge data. */
+static const char *page_name(uint8_t page) {
+  switch (page) {
+    case 0: return "overview"; case 1: return "input";
+    case 2: return "primitives"; case 3: return "indexed";
+    case 4: return "bitplanes"; case 5: return "playfield";
+    case 6: return "platform"; case 7: return "synth";
+    case 8: return "audio"; case 9: return "memory";
+    default: return "services";
+  }
+}
+
+static void draw_page(uint8_t page,uint32_t now,uint32_t input) {
+  switch (page) {
+    case 0: page_overview(now,input); break; case 1: page_input(now,input); break;
+    case 2: page_primitives(now,input); break; case 3: page_indexed(now,input); break;
+    case 4: page_bitplanes(now,input); break; case 5: page_tiles(now,input); break;
+    case 6: page_platform(now,input); break; case 7: page_synth(now,input); break;
+    case 8: page_audio_legacy(now,input); break; case 9: page_system(now,input); break;
+    default: page_services(now,input); break;
+  }
+}
 
 void devicedemo_init(void){
+  /* Assign asset addresses after loading so the compiler emits PC-relative
+   * references rather than absolute pointers in initialized cartridge data. */
+  indexed_sprite.pixels=indexed_pixels; indexed_sprite.palette=palette16;
+  indexed_sprite.width=16; indexed_sprite.height=16; indexed_sprite.frame_count=1;
+  indexed_sprite.palette_count=16; indexed_sprite.bits_per_pixel=PRG32_SPRITE_BPP_4;
+  indexed_sprite.transparent_index=0;
+  bitplane_sprite.pixels=bitplane_pixels; bitplane_sprite.palette=bitplane_palette;
+  bitplane_sprite.width=8; bitplane_sprite.height=8; bitplane_sprite.frame_count=1;
+  bitplane_sprite.palette_count=4; bitplane_sprite.bits_per_pixel=PRG32_SPRITE_BPP_2;
+  bitplane_sprite.transparent_index=0;
   g_page=0;g_prev_input=0;g_pressed=0;g_frame=0;prg32_gfx_set_fullscreen(0);
   prg32_band_set_mode(PRG32_BAND_TOP,PRG32_BAND_MODE_GAME); prg32_band_set_mode(PRG32_BAND_BOTTOM,PRG32_BAND_MODE_FPS);
   prg32_band_set_game_info("DeviceDemo+ development-c6");
@@ -184,13 +213,13 @@ void devicedemo_update(void){
     pressed&=~PRG32_BTN_B;
     g_pressed=pressed;
   }
-  if(pressed&PRG32_BTN_RIGHT) g_page=(uint8_t)((g_page+1)%ARRAY_LEN(pages));
-  if(pressed&PRG32_BTN_LEFT) g_page=(uint8_t)((g_page+ARRAY_LEN(pages)-1)%ARRAY_LEN(pages));
-  if((pressed&PRG32_BTN_B)||(pressed&PRG32_BTN_START)) g_page=(uint8_t)((g_page+1)%ARRAY_LEN(pages));
+  if(pressed&PRG32_BTN_RIGHT) g_page=(uint8_t)((g_page+1)%PAGE_COUNT);
+  if(pressed&PRG32_BTN_LEFT) g_page=(uint8_t)((g_page+PAGE_COUNT-1)%PAGE_COUNT);
+  if((pressed&PRG32_BTN_B)||(pressed&PRG32_BTN_START)) g_page=(uint8_t)((g_page+1)%PAGE_COUNT);
   g_prev_input=input; g_frame++;
-  prg32_band_set_text(PRG32_BAND_TOP,page_names[g_page]);
+  prg32_band_set_text(PRG32_BAND_TOP,page_name(g_page));
 }
 void devicedemo_draw(void){
   uint32_t input=prg32_input_read();
-  pages[g_page](prg32_ticks_ms(),input);
+  draw_page(g_page,prg32_ticks_ms(),input);
 }

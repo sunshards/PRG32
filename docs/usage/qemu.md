@@ -100,7 +100,7 @@ The multiplayer API works in QEMU without actual Wi-Fi. Calling `prg32_multiplay
 ## Recording cartridge previews
 
 `tools/capture_cartridge_previews.py` creates the checked-in 30-second MP4s
-from actual cartridge execution. On macOS it captures the QEMU SDL window,
+from actual cartridge execution. On macOS it continuously records the QEMU SDL window,
 crops away the window chrome and firmware status bands to retain only the
 320×200 game playfield, records the real 22050 Hz UART PCM stream, and injects
 documented gameplay controls through the QEMU UART keyboard mapper.
@@ -112,10 +112,13 @@ python3 tools/capture_cartridge_previews.py
 ```
 
 The script requires macOS `screencapture`, Swift/CoreGraphics, and FFmpeg
-(either `imageio-ffmpeg` or an explicit `--ffmpeg PATH`). CPU-heavy
-cartridges may advance QEMU's credit-paced audio clock more slowly while the
-window is sampled; the recorder time-normalizes only that captured cartridge
-PCM timeline to the corresponding 30-second video interval.
+(either `imageio-ffmpeg` or an explicit `--ffmpeg PATH`). The native window
+recorder avoids per-frame screenshot processes, leaving QEMU enough CPU to
+advance animation and its credit-paced audio clock in real time. If screen
+recording delays that clock by more than 250 ms, the tool deterministically
+replays the same cartridge and input sequence with SDL active but without the
+screen recorder, then uses that complete real PCM stream. It never substitutes
+or time-stretches generated audio.
 
 
 ## Troubleshooting

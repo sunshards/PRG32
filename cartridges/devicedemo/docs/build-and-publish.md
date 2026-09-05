@@ -27,6 +27,11 @@ The build scripts use the current unified `python3 -m prg32` command groups:
 
 The source intentionally targets `development-c6`, because indexed/bitplane sprite APIs and procedural synth instrument identifiers are introduced there.
 
+DeviceDemo uses explicit switch dispatch for its page names and draw callbacks.
+This keeps local code and string references PC-relative when a portable
+cartridge is dynamically loaded at a runtime address different from its link
+address; it deliberately avoids initialized absolute-pointer tables.
+
 ## Automated builds
 
 `.github/workflows/ci.yml` runs this two-architecture build on pull requests and

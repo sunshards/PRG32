@@ -9,6 +9,20 @@ Legacy cartridges can still use firmware-specific absolute imports resolved
 from `/api/runtime` or from a firmware ELF, but that mode is tied to one
 firmware image. New cartridges should be built with `--portable`.
 
+The public declarations in `components/prg32/include/prg32.h` include the
+cartridge-facing contracts for coordinates, lifetimes, return values, and data
+layouts. Documentation-only changes to that header do not change ABI indices,
+hashes, structure layouts, constants, or generated call stubs. Run
+`python3 -m prg32 abi check` after editing it; previously built portable
+cartridges must continue to validate and load without recompilation.
+
+Portable C builds use the medium-any code model and disable compiler-generated
+switch tables. This keeps normal code, literal references, and explicit switch
+dispatch position-relative when QEMU and hardware expose different executable
+buffer addresses. Cartridge sources should not store code or string addresses
+in initialized writable-data pointer tables; use explicit dispatch until the
+reserved relocation fields in the package format are activated.
+
 ## Register Convention
 
 PRG32 follows the standard RISC-V calling convention:

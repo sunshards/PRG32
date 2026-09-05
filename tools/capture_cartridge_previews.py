@@ -24,7 +24,7 @@ CARTRIDGES = {
                  "cartridges/bachdemo/assets/preview.mp4", ()),
     "blackjack": ("cartridges/blackjack/dist/store/blackjack-qemu.prg32",
                   "cartridges/blackjack/preview.mp4",
-                  ((1, "j"), (3, "j"), (7, "j"), (11, "k"), (16, "j"))),
+                  tuple((second, "j") for second in (1, 3, 6, 9, 12, 15, 18, 21, 24, 27))),
     "devicedemo": ("cartridges/devicedemo/dist/devicedemo-qemu.prg32",
                    "cartridges/devicedemo/assets/preview.mp4",
                    tuple((0.5 + i * 0.7, "d") for i in range(7)) + ((6, "j"),)),
@@ -78,8 +78,10 @@ for case let window as NSDictionary in windows {{
 
 
 def send_key(console: socket.socket, key: str) -> None:
-    """Send one key through the firmware's QEMU UART mapper."""
-    console.sendall(key.encode())
+    """Send a 90 ms pulse that reliably crosses a cartridge update boundary."""
+    for _ in range(3):
+        console.sendall(key.encode())
+        time.sleep(0.03)
 
 
 def audio_worker(process: subprocess.Popen, recording: threading.Event,
@@ -89,17 +91,27 @@ def audio_worker(process: subprocess.Popen, recording: threading.Event,
     target_size = round(duration * RATE) * 2
     try:
         sock.sendall(b"K")
+        next_credit = time.monotonic() + 0.02
         while process.poll() is None and len(samples) < target_size:
             data = bytearray()
             while len(data) < chunk_size:
-                part = sock.recv(chunk_size - len(data))
+                try:
+                    part = sock.recv(chunk_size - len(data))
+                except (ConnectionResetError, OSError):
+                    return
                 if not part:
                     return
                 data.extend(part)
             if recording.is_set():
                 samples.extend(data[:target_size - len(samples)])
-            time.sleep(0.02)
-            sock.sendall(b"K")
+            delay = next_credit - time.monotonic()
+            if delay > 0:
+                time.sleep(delay)
+            next_credit += 0.02
+            try:
+                sock.sendall(b"K")
+            except (BrokenPipeError, ConnectionResetError):
+                return
     finally:
         sock.close()
         if len(samples) == target_size:
@@ -119,6 +131,52 @@ def console_worker(console: socket.socket, transcript: bytearray,
         transcript.extend(data)
 
 
+def capture_audio_only(command: list[str], key_events: tuple[tuple[float, str], ...],
+                       warmup: float, duration: float) -> bytearray:
+    """Replay without screen recording to capture the complete real PCM stream.
+
+    Keep the SDL display active: the firmware rendering path is part of the
+    cartridge's normal execution, and QEMU's ``-display none`` mode can stall
+    that path.  Omitting only the macOS recorder removes the competing workload
+    while preserving the same firmware, cartridge, timing, and input sequence.
+    """
+    audio_command = list(command)
+    samples, transcript = bytearray(), bytearray()
+    recording, complete, stopping = (threading.Event(), threading.Event(),
+                                      threading.Event())
+    process = subprocess.Popen(audio_command, stdout=subprocess.DEVNULL,
+                               stderr=subprocess.DEVNULL)
+    thread = threading.Thread(target=audio_worker,
+                              args=(process, recording, complete, samples, duration),
+                              daemon=True)
+    thread.start()
+    console = connect_tcp(CONSOLE_PORT, process)
+    console_thread = threading.Thread(target=console_worker,
+                                      args=(console, transcript, stopping), daemon=True)
+    console_thread.start()
+    try:
+        time.sleep(warmup)
+        recording.set()
+        event = 0
+        deadline = time.monotonic() + duration * 3
+        while not complete.is_set() and time.monotonic() < deadline:
+            elapsed = len(samples) / 2 / RATE
+            while event < len(key_events) and key_events[event][0] <= elapsed:
+                send_key(console, key_events[event][1])
+                event += 1
+            time.sleep(0.01)
+        if not complete.is_set():
+            raise RuntimeError("audio-only QEMU replay did not complete")
+        return samples
+    finally:
+        stopping.set()
+        console_thread.join(timeout=1)
+        console.close()
+        process.terminate()
+        process.wait(timeout=10)
+        thread.join(timeout=2)
+
+
 def capture(name: str, duration: float, fps: int, warmup: float, ffmpeg: str,
             verbose_console: bool = False) -> None:
     cartridge_name, output_name, key_events = CARTRIDGES[name]
@@ -132,8 +190,7 @@ def capture(name: str, duration: float, fps: int, warmup: float, ffmpeg: str,
     with tempfile.TemporaryDirectory(prefix=f"prg32-{name}-capture-") as temp_name:
         temp = Path(temp_name)
         flash, efuse = temp / "flash.bin", temp / "efuse.bin"
-        frames = temp / "frames"
-        frames.mkdir()
+        raw_video = temp / "qemu-window.mov"
         shutil.copy2(ROOT / "build-qemu/qemu_flash.bin", flash)
         shutil.copy2(ROOT / "build-qemu/qemu_efuse.bin", efuse)
         subprocess.run(["python3", "-m", "prg32", "qemu", "upload", str(cartridge),
@@ -170,19 +227,20 @@ def capture(name: str, duration: float, fps: int, warmup: float, ffmpeg: str,
                 time.sleep(warmup)
                 start = time.monotonic()
                 recording.set()
+                video = subprocess.Popen([
+                    "/usr/sbin/screencapture", "-v", f"-V{duration:g}", "-x", "-o",
+                    f"-l{window_id}", str(raw_video),
+                ])
                 event = 0
-                for frame in range(round(duration * fps)):
+                while video.poll() is None:
                     elapsed = time.monotonic() - start
                     while event < len(key_events) and key_events[event][0] <= elapsed:
                         send_key(console, key_events[event][1])
                         event += 1
-                    frame_path = frames / f"frame-{frame:05d}.png"
-                    subprocess.run(["/usr/sbin/screencapture", "-x", "-o",
-                                    f"-l{window_id}", str(frame_path)], check=True)
-                    delay = start + (frame + 1) / fps - time.monotonic()
-                    if delay > 0:
-                        time.sleep(delay)
-                audio_complete.wait(15)
+                    time.sleep(0.02)
+                if video.returncode != 0 or not raw_video.exists():
+                    raise RuntimeError("macOS window video capture failed")
+                audio_complete.wait(3)
             finally:
                 stopping.set()
                 console_thread.join(timeout=1)
@@ -197,18 +255,20 @@ def capture(name: str, duration: float, fps: int, warmup: float, ffmpeg: str,
         expected = round(duration * RATE) * 2
         if len(samples) < RATE * 2:
             raise RuntimeError(f"audio capture too short: {len(samples)}/{expected} bytes")
-        tempo = max(0.5, min(2.0, (len(samples) / 2 / RATE) / duration))
-        if len(samples) != expected:
-            print(f"resampling {name} QEMU audio timeline: {len(samples)}/{expected} bytes")
+        actual_audio_duration = len(samples) / 2 / RATE
+        if abs(actual_audio_duration - duration) > 0.25:
+            print(f"replaying {name} without display capture for complete PCM "
+                  f"({actual_audio_duration:.3f}s received during video pass)")
+            samples = capture_audio_only(command, key_events, warmup, duration)
         with wave.open(str(audio), "wb") as wav:
             wav.setparams((1, 2, RATE, len(samples) // 2, "NONE", "not compressed"))
             wav.writeframes(samples)
         subprocess.run([
-            ffmpeg, "-y", "-loglevel", "error", "-framerate", str(fps),
-            "-i", str(frames / "frame-%05d.png"), "-i", str(audio), "-t", str(duration),
+            ffmpeg, "-y", "-loglevel", "error", "-i", str(raw_video),
+            "-i", str(audio), "-t", str(duration),
             "-vf", "crop=iw:200:0:48,scale=320:200:flags=neighbor",
-            "-af", f"atempo={tempo:.6f},apad",
-            "-c:v", "libx264", "-preset", "medium", "-crf", "23", "-pix_fmt", "yuv420p",
+            "-r", str(fps), "-af", "apad",
+            "-c:v", "libx264", "-preset", "medium", "-crf", "20", "-pix_fmt", "yuv420p",
             "-c:a", "aac", "-b:a", "96k", "-movflags", "+faststart", str(output),
         ], check=True)
     print(f"captured {name}: {output.relative_to(ROOT)}")
@@ -218,7 +278,8 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("names", nargs="*", choices=CARTRIDGES)
     parser.add_argument("--duration", type=float, default=30)
-    parser.add_argument("--fps", type=int, default=5)
+    parser.add_argument("--fps", type=int, default=30,
+                        help="encoded output frame rate (default: 30)")
     parser.add_argument("--warmup", type=float, default=7)
     parser.add_argument("--ffmpeg")
     parser.add_argument("--verbose-console", action="store_true")
