@@ -1,22 +1,29 @@
 # PRG32 Performance Metrics
 
+For a complete operational workflow—including QEMU and ESP32-C6 execution,
+result retrieval, statistical interpretation, and custom performance-cartridge
+development—begin with the
+[Performance Test Guide](../performance_test.md). This document remains the
+field-level reference for performance JSON and streaming metrics.
+
 PRG32 can collect lightweight frame-performance metrics in two ways:
 
-- the setup-mode **Performance Test** runs an unattended benchmark and stores
-  raw samples plus aggregate windows in RAM on the board or QEMU instance
+- the normal **Performance Test cartridge** runs an unattended benchmark and
+  publishes compact aggregate results through the resident broker
 - the optional streaming metrics pipeline records cartridge frames and uploads
   buffered batches to a small Flask/SQLite server
 
-The setup performance test is available in normal firmware builds. Streaming
-metrics are disabled by default so ordinary classroom gameplay is unchanged.
-Enable streaming only for profiling labs, regression checks, or trainer-led
-experiments.
+The resident performance broker is available in normal firmware builds; the
+reference workload is supplied by the optional performance-test cartridge.
+Streaming metrics are disabled by default so ordinary classroom gameplay is
+unchanged. Enable streaming only for profiling labs, regression checks, or
+trainer-led experiments.
 
-## Setup Performance Test
+## Performance Test Cartridge
 
-Open setup mode and choose `PERFORMANCE TEST`. The firmware starts the Wi-Fi
-HTTP API if possible, then runs every measurement screen without further user
-interaction. At the end it shows a summary on the 320x240 setup screen.
+Install and run `cartridges/performancetest` like any other cartridge. It runs
+every measurement screen without further interaction and then shows a summary.
+The workload is not linked into resident firmware.
 
 The unattended sequence measures five distinct screens in both `rgb565` and
 `indexed` color modes. Each frame includes the same 24-sprite color probe; the
@@ -32,11 +39,12 @@ two measurements are directly comparable.
 | `scrolling` | horizontal and vertical scrolling with parallax-like stars |
 | `mixed-gameplay` | combined text, sprites, scrolling road, and playfield objects |
 
-The test stores results only in RAM:
+The broker stores compact results only in RAM:
 
-- a new run replaces the previous run
+- a new run replaces the previous compact result
 - rebooting the board or QEMU clears the results
 - no per-frame network traffic is generated during the benchmark
+- raw frame arrays are released as each case ends
 
 Download the JSON file after the summary is visible:
 
@@ -49,8 +57,9 @@ Use the current setup IP address when the board is in infrastructure mode.
 The endpoint streams the response in HTTP chunks, so the ESP32 does not need to
 allocate a second full copy of the raw sample set while serving the file.
 
-The JSON contains top-level run metadata, raw sampled frames, aggregate windows,
-and a summary object. The run metadata includes:
+Compact schema version 2 contains top-level run metadata, compact case
+aggregates, memory checkpoints, and a summary object. It deliberately does not
+retain raw sampled frames or aggregate windows. The run metadata includes:
 
 | Field | Meaning |
 |---|---|
@@ -60,7 +69,7 @@ and a summary object. The run metadata includes:
 | `display_backend` | `ili9341` or `qemu_rgb` |
 | `firmware_git_sha` | firmware source identifier when available |
 | `firmware_version` | ESP-IDF application version string |
-| `game_name` | `setup-performance-test` for this built-in benchmark |
+| `game_name` | suite name supplied by the cartridge; `setup-performance-test` for the reference suite |
 | `cartridge_generation` | loaded cartridge generation counter |
 | `build_type` | `release` or `debug` |
 | `wifi_mode` | `off`, `access_point`, `infrastructure`, or `ap_infrastructure` |
@@ -71,7 +80,8 @@ and a summary object. The run metadata includes:
 | `started_at_device_us` | ESP timer timestamp when the run began |
 | `started_at_server_ts` | `null` for onboard-only runs |
 
-Each raw sample records:
+The optional streaming metrics pipeline uses raw sample records with these
+fields; they are not retained by the compact performance-cartridge result:
 
 | Field | Meaning |
 |---|---|
@@ -89,13 +99,16 @@ Each raw sample records:
 | `input_mask` | merged menu input mask |
 | `upload_queue_depth` | streaming queue depth, zero for onboard tests |
 
-Each aggregate window includes `frames`, `fps_mean`, frame-time min/mean/p50/p95/p99/max,
-missed deadlines, update/draw/present means, and minimum heap.
+Streaming aggregate windows include `frames`, `fps_mean`, frame-time
+min/mean/p50/p95/p99/max, missed deadlines, update/draw/present means, and
+minimum heap. The compact performance result leaves `aggregate_windows` empty.
 
 The `screen_summaries` array contains one aggregate per screen and color mode.
-The `comparisons` array groups the RGB565 and indexed aggregates for each
-screen under one object. The on-device summary likewise displays a single table
-with `RGB FPS` and `IDX FPS` columns.
+Compact schema version 2 leaves `comparisons` empty. Consumers construct paired
+comparisons by joining `screen_summaries` on `screen_index` and `screen_name`
+and separating entries by `color_mode`. The on-device summary reports the
+overall frame count, mean FPS, mean and maximum frame time, missed deadlines,
+and minimum free heap.
 
 ### QEMU reference result
 
@@ -132,21 +145,13 @@ Compact example:
   "screen_count": 5,
   "result_count": 10,
   "color_modes": ["rgb565", "indexed"],
-  "samples": [
-    {"screen_index": 0, "screen_name": "clear-fill", "color_mode": "rgb565"}
-  ],
+  "samples": [],
+  "aggregate_windows": [],
   "screen_summaries": [
     {"screen_index": 0, "screen_name": "clear-fill", "color_mode": "rgb565", "fps_mean": 30.1},
     {"screen_index": 0, "screen_name": "clear-fill", "color_mode": "indexed", "fps_mean": 29.8}
   ],
-  "comparisons": [
-    {
-      "screen_index": 0,
-      "screen_name": "clear-fill",
-      "rgb565": {"fps_mean": 30.1, "frame_us_mean": 33220, "frame_us_p95": 33410},
-      "indexed": {"fps_mean": 29.8, "frame_us_mean": 33540, "frame_us_p95": 33800}
-    }
-  ]
+  "comparisons": []
 }
 ```
 
@@ -310,10 +315,9 @@ plots when `matplotlib` is installed.
 6. Explain how measurement overhead and network conditions affect the results.
 
 
-(?)
 - For reproducible scientific measurements, use
   `sdkconfig.defaults;sdkconfig.defaults.metrics` as described in
-  `docs/scientific_measurement_tutorial.md`.
+  [Scientific Measurement Tutorial](scientific_measurement_tutorial.md).
 
 ## Development Guide
 

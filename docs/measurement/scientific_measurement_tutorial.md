@@ -228,10 +228,15 @@ figures for PRG32 demos and games.
 
 ## 9. Export Metrics
 
-For the built-in unattended benchmark, use setup mode:
+The [Performance Test Guide](../performance_test.md) is the canonical
+step-by-step reference for building, staging, running, retrieving, and
+interpreting the unattended test. This section places that workflow within a
+larger experimental protocol.
 
-1. Enter setup mode.
-2. Select `PERFORMANCE TEST`.
+For the unattended benchmark, install and run the reference cartridge:
+
+1. Build and install `cartridges/performancetest`.
+2. Run the cartridge.
 3. Do not press any buttons while the automatic measurement screens run.
 4. Wait until the summary screen appears.
 5. Download the latest in-RAM metrics file:
@@ -250,10 +255,10 @@ data and then with packed 2-bpp indexed data. Both passes draw the same 24
 four-color probe sprites per frame. Scene state is reset before the indexed
 pass so each pair receives identical positions and animation inputs.
 
-The JSON includes raw frame samples, one-second aggregate windows, ten
-`screen_summaries` (five workloads times two color modes), and five paired
-`comparisons`. Use `color_mode` rather than inferring the mode from frame or
-array order.
+Compact schema version 2 includes ten `screen_summaries` (five workloads times
+two color modes) and leaves `samples`, `aggregate_windows`, and `comparisons`
+empty. Construct paired comparisons by joining summaries on `screen_index` and
+`screen_name`; use `color_mode` rather than inferring the mode from array order.
 
 Create paper-ready artifacts:
 

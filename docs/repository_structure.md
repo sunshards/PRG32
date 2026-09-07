@@ -14,6 +14,7 @@ This document outlines the high-level layout of the PRG32 repository.
 |   |-- bachdemo/                   Eight-voice procedural Bach audio showcase
 |   |-- blackjack/                  Casino blackjack game and rules tests
 |   |-- devicedemo/                 Hardware/runtime feature showcase
+|   |-- performancetest/             Pluggable public-ABI measurement reference
 |   `-- poing/                      Procedural real-time graphics showcase
 |       `-- assets/                 Screenshots and 30-second audiovisual previews
 |-- components/
@@ -26,7 +27,8 @@ This document outlines the high-level layout of the PRG32 repository.
 |   |   |-- AGENTS.md               Hardware and purchasing-document maintenance rules
 |   |   `-- where_to_buy.md         Central bill of materials and country-specific supplier links
 |   |-- learn/                      Classroom tutorials, lab handouts, and educational material
-|   |-- measurement/                Scientific measurement and metrics API documentation
+|   |-- performance_test.md         Canonical performance-test execution, interpretation, and extension guide
+|   |-- measurement/                Scientific methodology, metrics schema, ABI, and validation records
 |   |-- software/                   Firmware manuals, C framework details, and ABI definitions
 |   |-- tools/                      Guides for Python tooling and conversion utilities
 |   `-- usage/                      Getting started, tooling, QEMU, and troubleshooting guides

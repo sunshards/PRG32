@@ -288,7 +288,24 @@ static const uint8_t *suit_bits(int suit) {
 }
 static uint16_t suit_color(int suit) { return (suit==1||suit==3)?C_RED:C_BLACK; }
 static const char *rank_name(int rank) {
-    static const char *names[13]={"A","2","3","4","5","6","7","8","9","10","J","Q","K"}; return names[rank];
+    /*
+     * Portable cartridges do not contain relocation records.  Select each
+     * literal directly so the compiler emits a PC-relative address instead
+     * of a table of absolute string pointers tied to one cartridge RAM base.
+     */
+    if(rank==0) return "A";
+    if(rank==1) return "2";
+    if(rank==2) return "3";
+    if(rank==3) return "4";
+    if(rank==4) return "5";
+    if(rank==5) return "6";
+    if(rank==6) return "7";
+    if(rank==7) return "8";
+    if(rank==8) return "9";
+    if(rank==9) return "10";
+    if(rank==10) return "J";
+    if(rank==11) return "Q";
+    return "K";
 }
 static void draw_card_face(int x,int y,uint8_t card,int compact) {
     int r=bj_card_rank(card),s=bj_card_suit(card); uint16_t col=suit_color(s); int w=compact?28:34,h=compact?40:48;
@@ -298,7 +315,20 @@ static void draw_card_face(int x,int y,uint8_t card,int compact) {
     prg32_sprite_draw_8x8(x+(w-8)/2,y+(h-8)/2,suit_bits(s),col,C_CARD);
     if(!compact) prg32_sprite_draw_8x8(x+w-11,y+h-11,suit_bits(s),col,C_CARD);
 }
-static void draw_card_back(int x,int y) { prg32_gfx_rect(x+2,y+2,24,32,C_SHADOW); prg32_sprite_draw_indexed(x,y,&bj_cardback_sprite,0); }
+static void draw_card_back(int x,int y) {
+    prg32_indexed_sprite_t sprite;
+    /* Assign pointers at runtime so both QEMU and ESP32-C6 load bases work. */
+    sprite.pixels=bj_cardback_pixels;
+    sprite.palette=bj_cardback_palette;
+    sprite.width=24;
+    sprite.height=32;
+    sprite.frame_count=1;
+    sprite.palette_count=5;
+    sprite.bits_per_pixel=4;
+    sprite.transparent_index=-1;
+    prg32_gfx_rect(x+2,y+2,24,32,C_SHADOW);
+    prg32_sprite_draw_indexed(x,y,&sprite,0);
+}
 
 static void draw_hand(const bj_hand_t *h,int x,int y,int hide_first,int active) {
     int i,step=h->count>6?18:24;

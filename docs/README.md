@@ -65,8 +65,10 @@ Welcome to the documentation for PRG32! To make it easier to find what you need,
 *Scientific and performance measurement guides, including paired RGB565 and
 indexed-color benchmarks.*
 
+- [Performance Test Guide](performance_test.md)
 - [Scientific Measurement Tutorial](measurement/scientific_measurement_tutorial.md)
 - [Metrics API](measurement/metrics_api.md)
+- [Performance Cartridge ABI](measurement/performance_cartridge_abi.md)
 
 ## Cartridge Store
 *Multiplayer, Score upload*

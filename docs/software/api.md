@@ -340,7 +340,7 @@ Main use cases:
 GET /api/performance.json
 ```
 
-Returns the latest setup-mode performance test result. The endpoint streams JSON
+Returns the latest performance-cartridge result. The endpoint streams JSON
 chunks so the firmware does not need to allocate a second full copy of the data.
 
 Example:
@@ -352,14 +352,16 @@ curl http://192.168.4.1/api/performance.json \
 
 Expected behavior:
 
-- returns the most recent in-RAM setup performance test;
-- includes `color_modes`, mode-tagged raw samples and screen summaries, plus a
-  `comparisons` array pairing RGB565 and indexed results for each workload;
+- returns the most recent in-RAM performance-cartridge result;
+- includes `color_modes` and mode-tagged screen summaries;
 - reports `screen_count: 5` for workloads and `result_count: 10` for
   workload/mode combinations;
-- retains the pre-existing timing, heap, aggregate-window, and summary fields;
+- retains established timing, heap, and summary fields; compact schema version
+  2 leaves `samples`, `aggregate_windows`, and `comparisons` empty;
 - rebooting the board or QEMU clears the stored result;
-- read [Metrics API](/docs/measurement/metrics_api.md) for the full JSON field reference.
+- read the [Performance Test Guide](/docs/performance_test.md) for execution and
+  interpretation, and [Metrics API](/docs/measurement/metrics_api.md) for the
+  complete field reference.
 
 ## Score API
 

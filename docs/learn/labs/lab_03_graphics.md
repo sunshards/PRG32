@@ -42,16 +42,21 @@ For QEMU:
 idf.py -B build-qemu -D SDKCONFIG=build-qemu/sdkconfig -D SDKCONFIG_DEFAULTS=sdkconfig.defaults.qemu qemu --graphics monitor
 ```
 
-Optional extension: build your rectangle game as a `.prg32` cartridge and upload
-it without reflashing the resident firmware. Use `docs/cartridges.md`.
+Optional extension: build your rectangle game as a `.prg32` cartridge and
+upload it without reflashing the resident firmware. Use
+[Cartridge Format and Tooling](../../software/cartridges.md).
 
 Feature extension: run one demo under `examples/features` and identify which
 helper implements scrolling, animation, or dual playfields.
 
 Memory extension: convert one sprite in RGB565 and 4-bpp indexed modes, record
-the generated pixel-data sizes, and draw both. Then run `PERFORMANCE TEST` from
-setup mode and explain the paired `RGB FPS` and `IDX FPS` columns. Download
-`/api/performance.json` and locate the matching entries in `comparisons`.
+the generated pixel-data sizes, and draw both. Then install and run the
+performance-test cartridge. Download `/api/performance.json`, match entries in
+`screen_summaries` by `screen_index` and `screen_name`, and compare their
+`rgb565` and `indexed` color modes. Compact schema version 2 leaves the
+`comparisons` array empty; students construct the pairing explicitly. Follow
+the [Performance Test Guide](../../performance_test.md) for the controlled
+workflow and interpretation rules.
 
 Performance extension: repeat the paired benchmark with one fixed firmware
 revision and optimization profile. Treat draw time as CPU composition work and

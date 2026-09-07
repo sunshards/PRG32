@@ -1,8 +1,8 @@
 {
   "name": "prg32-cart-abi",
   "major": 1,
-  "minor": 3,
-  "compatible_hashes": ["0xec21efe2"],
+  "minor": 4,
+  "compatible_hashes": ["0xec21efe2", "0x5626cb8a"],
   "functions": [
     {
       "name": "prg32_ticks_ms",
@@ -871,6 +871,69 @@
       "args": [],
       "feature": "sprites",
       "notes": "Draw a planar indexed-color frame without expanding it in cartridge memory."
+    },
+    {
+      "name": "prg32_perf_now_us",
+      "return": "uint64_t",
+      "args": [],
+      "feature": "metrics",
+      "notes": "Return the monotonic device timestamp in microseconds."
+    },
+    {
+      "name": "prg32_perf_begin",
+      "return": "int",
+      "args": ["const prg32_perf_suite_desc_t *"],
+      "feature": "metrics",
+      "notes": "Begin a versioned pluggable measurement suite."
+    },
+    {
+      "name": "prg32_perf_case_begin",
+      "return": "int",
+      "args": ["const prg32_perf_case_desc_t *", "uint32_t"],
+      "feature": "metrics",
+      "notes": "Begin a named case and allocate its temporary percentile workspace."
+    },
+    {
+      "name": "prg32_perf_record",
+      "return": "int",
+      "args": ["const prg32_perf_sample_t *"],
+      "feature": "metrics",
+      "notes": "Record one caller-measured frame in the active case."
+    },
+    {
+      "name": "prg32_perf_case_end",
+      "return": "int",
+      "args": [],
+      "feature": "metrics",
+      "notes": "Aggregate the active case and release its temporary workspace."
+    },
+    {
+      "name": "prg32_perf_end",
+      "return": "int",
+      "args": [],
+      "feature": "metrics",
+      "notes": "Complete and publish the active suite."
+    },
+    {
+      "name": "prg32_perf_abort",
+      "return": "int",
+      "args": [],
+      "feature": "metrics",
+      "notes": "Abort safely and release all session workspace."
+    },
+    {
+      "name": "prg32_perf_get_state",
+      "return": "int",
+      "args": ["prg32_perf_state_t *"],
+      "feature": "metrics",
+      "notes": "Copy versioned lifecycle and heap state."
+    },
+    {
+      "name": "prg32_perf_get_summary",
+      "return": "int",
+      "args": ["prg32_performance_summary_t *"],
+      "feature": "metrics",
+      "notes": "Copy the compact completed-run summary."
     }
   ]
 }

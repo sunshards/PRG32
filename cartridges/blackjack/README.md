@@ -59,6 +59,14 @@ clang -std=c11 -Wall -Wextra -Werror tests/test_rules.c blackjack_rules.c -o bui
 
 `tests/stub/prg32.h` exists only for host syntax checking and is never packed into the cartridge.
 
+## Portable data references
+
+The cartridge avoids static tables and descriptors containing pointers into
+its own image. Portable `.prg32` packages do not carry relocation records, and
+QEMU and ESP32-C6 can load cartridge RAM at different addresses. Rank strings
+are therefore selected with explicit branches, and the indexed card-back
+descriptor is assembled at runtime from PC-relative asset addresses.
+
 ## CI/CD
 
 `.github/workflows/ci.yml` runs the rules test, verifies `SHA256SUMS`, builds

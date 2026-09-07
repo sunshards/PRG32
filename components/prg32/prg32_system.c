@@ -87,7 +87,6 @@ typedef enum {
   SETUP_OPTION_DEFAULT_CART,
   SETUP_OPTION_SETTINGS,
   SETUP_OPTION_STORE_BROWSE,
-  SETUP_OPTION_PERFORMANCE,
   SETUP_OPTION_ABOUT,
   SETUP_OPTION_EXIT,
 } setup_option_id_t;
@@ -172,26 +171,6 @@ static void show_setup_message(const char *title, const char *line,
   if (ms > 0) {
     vTaskDelay(pdMS_TO_TICKS(ms));
   }
-}
-
-static void start_performance_http_api(void) {
-  if (prg32_wifi_current_mode() != PRG32_WIFI_MODE_OFF) {
-    prg32_scores_api_start();
-    return;
-  }
-
-#if PRG32_WIFI_AP_ENABLE
-  prg32_wifi_config_t config = {
-      .mode = PRG32_WIFI_MODE_AP,
-  };
-  snprintf(config.ap_ssid, sizeof(config.ap_ssid), "%s", PRG32_WIFI_AP_SSID);
-  snprintf(config.ap_password, sizeof(config.ap_password), "%s",
-           PRG32_WIFI_AP_PASSWORD);
-  prg32_wifi_start_mode(&config);
-#else
-  prg32_wifi_scores_init();
-#endif
-  prg32_scores_api_start();
 }
 
 static int draw_cartridge_status(int y) {
@@ -966,10 +945,6 @@ static int setup_menu(void) {
         "BROWSE STORE",
     };
     options[option_count++] = (setup_option_t){
-        SETUP_OPTION_PERFORMANCE,
-        "PERFORMANCE TEST",
-    };
-    options[option_count++] = (setup_option_t){
         SETUP_OPTION_ABOUT,
         "ABOUT PRG32",
     };
@@ -1025,11 +1000,6 @@ static int setup_menu(void) {
           if (prg32_cart_is_loaded()) {
             return 0;
           }
-          break;
-        }
-        if (selected == SETUP_OPTION_PERFORMANCE) {
-          start_performance_http_api();
-          prg32_performance_test_run();
           break;
         }
         if (selected == SETUP_OPTION_ABOUT) {

@@ -208,19 +208,20 @@ The public API is in `prg32_metrics.h`:
 The resident firmware instruments the cartridge update/draw/present loop when
 metrics are enabled. `prg32_metrics_record` only copies into a ring buffer; HTTP
 upload is handled asynchronously so the measured frame code does not wait for
-the network. See `docs/metrics_api.md` for the server, export workflow, and lab
-exercise.
+the network. See [Performance Metrics](/docs/measurement/metrics_api.md) for
+the server, export workflow, and lab exercise.
 
-Setup mode also includes `PERFORMANCE TEST`, an unattended multi-screen
-benchmark that stores raw frame samples, one-second aggregate windows, and
-per-screen/per-color-mode summaries in RAM without streaming every frame. The latest run is
+The optional `performancetest` cartridge provides an unattended multi-case
+benchmark that retains compact per-screen/per-color-mode summaries in RAM
+without streaming every frame. Temporary percentile samples are released at
+the end of each case. The latest run is
 available as `/api/performance.json` until the next benchmark or reboot. The
-built-in screens isolate clear/fill, text overlay, sprite storm, scrolling, and
+cartridge cases isolate clear/fill, text overlay, sprite storm, scrolling, and
 mixed-gameplay workloads. Every workload runs through matched RGB565 and
-indexed-color sprite probes; the final screen presents both FPS results in one
-comparison table. The JSON API preserves the mode on every sample and groups
-paired results per workload. Use `tools/prg32_metrics_paper.py` to turn that JSON
-into LaTeX tables, captions, and high-resolution figures for a paper.
+indexed-color sprite probes; the final screen reports an aggregate summary and
+the complete result endpoint. The JSON API preserves the mode on every case
+summary. See the [Performance Test Guide](/docs/performance_test.md) for the
+execution workflow, interpretation rules, and custom ABI tutorial.
 
 `screen_count` remains five because it counts distinct workloads;
 `result_count` is ten because every workload produces an RGB565 result and an

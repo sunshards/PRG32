@@ -66,6 +66,13 @@ QEMU uses the same `.prg32` game packages as the physical board.
    ```
    *(Note: You can also use `python3 -m prg32 qemu build-and-run` for convenience).*
 
+The reference performance cartridge follows this workflow with additional
+measurement controls and interpretation rules. See
+[Performance Test Guide](../performance_test.md#4-run-the-reference-test-in-qemu).
+QEMU does not expose a cartridge-visible Wi-Fi address, so the completion
+screen shows an explicit `<board-ip>` placeholder; use physical ESP32-C6
+hardware when the JSON result must be retrieved over HTTP.
+
 ## QEMU Audio (UART Redirection)
 
 Because QEMU lacks native I2S emulation for the ESP32-C3 backend, PRG32 uses a custom **Credit-Based Flow Control** protocol to redirect the 22050Hz PCM audio stream over the virtual UART port (`tcp::4321`) to the host machine.

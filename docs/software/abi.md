@@ -72,6 +72,20 @@ ABI minor `3` appends `prg32_sprite_draw_indexed` and
 already-built portable cartridges continue to load; existing function indices
 and all RGB565 prototypes remain unchanged.
 
+ABI minor `4` appends indices 124 through 132 for the pluggable performance
+broker: `prg32_perf_now_us`, `prg32_perf_begin`,
+`prg32_perf_case_begin`, `prg32_perf_record`,
+`prg32_perf_case_end`, `prg32_perf_end`, `prg32_perf_abort`,
+`prg32_perf_get_state`, and `prg32_perf_get_summary`. ABI 1.3 hash
+`0x5626cb8a` and the earlier supported hash `0xec21efe2` remain accepted.
+The exact new 1.4 hash is generated from `prg32_abi.json`.
+
+The performance broker lifecycle, descriptor layouts, failure semantics, and
+custom-cartridge tutorial are documented in the
+[Performance Test Guide](/docs/performance_test.md). The concise contract is
+also available in
+[Pluggable Performance Cartridge ABI](/docs/measurement/performance_cartridge_abi.md).
+
 ## Compact Sprite ABI Calls
 
 | Symbol | Asset layout |
@@ -312,6 +326,15 @@ Setup screens and cartridge programs use the same button bitmasks:
 | `prg32_score_count` | count local scoreboard records, optionally by game |
 | `prg32_score_get` | copy one local scoreboard record |
 | `prg32_scoreboard_show` | show the built-in local scoreboard screen |
+| `prg32_perf_now_us` | return the monotonic microsecond timer used for benchmark intervals |
+| `prg32_perf_begin` | begin one cartridge-defined performance suite |
+| `prg32_perf_case_begin` | begin one named case and reserve its temporary observations |
+| `prg32_perf_record` | submit one update/draw/present timing observation |
+| `prg32_perf_case_end` | aggregate the active case and release its temporary array |
+| `prg32_perf_end` | finalize a suite and publish its compact result |
+| `prg32_perf_abort` | terminate a suite and release active temporary storage |
+| `prg32_perf_get_state` | copy lifecycle and heap checkpoints into a versioned structure |
+| `prg32_perf_get_summary` | copy the completed suite-wide aggregate |
 | `prg32_performance_test_run` | run the unattended multi-screen setup benchmark |
 | `prg32_performance_has_results` | return nonzero when onboard benchmark results are available |
 | `prg32_performance_summary` | copy the latest benchmark summary into a caller-provided struct |

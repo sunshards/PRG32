@@ -94,6 +94,7 @@ not-a-symbol
 class PortableHeaderTests(unittest.TestCase):
     def test_current_runtime_accepts_previous_append_only_abi_hash(self) -> None:
         self.assertIn(0xEC21EFE2, COMPATIBLE_ABI_HASHES)
+        self.assertIn(0x5626CB8A, COMPATIBLE_ABI_HASHES)
         payload = b"\0\0\0\0"
         header = env_variables.CART_HEADER_V2.pack(
             env_variables.CART_MAGIC,
@@ -109,6 +110,20 @@ class PortableHeaderTests(unittest.TestCase):
             env_variables.PRG32_IMPORT_MODEL_ABI_TABLE,
         )
         runtime_handler.validate_cartridge_contract(header + payload)
+
+    def test_performance_abi_is_appended_after_indexed_graphics(self) -> None:
+        self.assertEqual(IMPORT_NAMES[122], "prg32_sprite_draw_indexed")
+        self.assertEqual(IMPORT_NAMES[123], "prg32_sprite_draw_bitplanes")
+        self.assertEqual(
+            IMPORT_NAMES[124:],
+            [
+                "prg32_perf_now_us", "prg32_perf_begin",
+                "prg32_perf_case_begin", "prg32_perf_record",
+                "prg32_perf_case_end", "prg32_perf_end",
+                "prg32_perf_abort", "prg32_perf_get_state",
+                "prg32_perf_get_summary",
+            ],
+        )
 
     def test_portable_build_uses_position_tolerant_riscv_flags(self) -> None:
         # We look in build_cartridge.py now
