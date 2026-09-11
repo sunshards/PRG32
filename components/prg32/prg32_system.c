@@ -9,7 +9,7 @@
 
 void prg32_display_init(void);
 void prg32_input_init(void);
-void prg32_audio_pwm_init(void);
+void prg32_buzzer_init(void);
 void prg32_abi_exports_keep(void);
 
 #ifdef CONFIG_HEAP_TASK_TRACKING
@@ -602,7 +602,7 @@ static void play_audio_test_tune(setup_audio_output_t output) {
   if (output == SETUP_AUDIO_PWM) {
     for (size_t i = 0; i < sizeof(freq) / sizeof(freq[0]); ++i) {
       prg32_audio_led_vu_level((uint8_t)(72 + i * 48));
-      prg32_audio_tone(freq[i], 110, duty);
+      prg32_buzzer_tone(freq[i], 110, duty);
       vTaskDelay(pdMS_TO_TICKS(35));
     }
     prg32_audio_led_vu_level(0);
@@ -1044,8 +1044,8 @@ void prg32_init(void) {
   printf("prg32_init => prg32_rgb_led_init()\n");
   prg32_rgb_led_init(PRG32_PIN_RGB_LED);
   PRG32_MEM_CHECKPOINT("prg32_rgb_led_init");
-  printf("prg32_init => prg32_audio_pwm_init()\n");
-  prg32_audio_pwm_init();
+  printf("prg32_init => prg32_buzzer_init()\n");
+  prg32_buzzer_init();
   PRG32_MEM_CHECKPOINT("prg32_audio_pwm");
 
   esp_err_t nvs_err = nvs_flash_init();

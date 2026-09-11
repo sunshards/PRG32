@@ -28,6 +28,8 @@ static void audio_task(void *arg) {
     if (elapsed_ms > 0) {
       last_us = now_us;
       prg32_audio_tracker_step(elapsed_ms);
+
+      prg32_audio_voices_step(elapsed_ms);
     }
 
     if (g_prg32_audio.config.mode == PRG32_AUDIO_MODE_STEREO) {
@@ -87,6 +89,27 @@ void prg32_audio_unlock(void) {
   }
 }
 
+// TODO: This could be turned into a dynamically generated
+// PRG32_AUDIO_SYNTH_PULSE instead of being hard-saved.
+void prg32_audio_restore_defaults(void) {
+  static const uint8_t default_wave[] = {
+      128, 166, 202, 231, 250, 255, 246, 224, 192, 154, 114, 76,  44,  20,  6,
+      0,   6,   20,  44,  76,  114, 154, 192, 224, 246, 255, 250, 231, 202, 166,
+  };
+
+  prg32_audio_register_sample(62, default_wave, sizeof(default_wave), 60,
+                              PRG32_AUDIO_SAMPLE_LOOP, 0, sizeof(default_wave));
+
+  prg32_instrument_desc_t default_inst = {
+      .sample_id = 62,
+      .default_volume = 150,
+      .default_pan = PRG32_AUDIO_PAN_CENTER,
+      .sustain = 255,
+  };
+  prg32_audio_register_instrument(PRG32_DEFAULT_INSTRUMENT_ID, &default_inst);
+  prg32_audio_register_instrument(31, &default_inst);
+}
+
 bool prg32_audio_init(const prg32_audio_config_t *config) {
 #if !CONFIG_PRG32_AUDIO_ENABLED
   (void)config;
@@ -127,6 +150,9 @@ bool prg32_audio_init(const prg32_audio_config_t *config) {
   g_prg32_audio.i2s_ready = prg32_audio_i2s_start(&chosen) == 0;
 #endif
   g_prg32_audio.initialized = true;
+
+  prg32_audio_restore_defaults();
+
   int priority = tskIDLE_PRIORITY + 2;
   xTaskCreate(audio_task, "prg32_audio", 4096, NULL, priority,
               &g_prg32_audio.task);

@@ -162,9 +162,9 @@ static void prg32_splash_play_pwm_welcome(uint32_t duration_ms) {
   const uint32_t step_ms = duration_ms >= 360 ? 120 : duration_ms / 3;
   const uint32_t tail_ms =
       duration_ms > step_ms * 2 ? duration_ms - step_ms * 2 : step_ms;
-  prg32_audio_note(72, step_ms);
-  prg32_audio_note(76, step_ms);
-  prg32_audio_note(79, tail_ms);
+  prg32_buzzer_tone(523, step_ms, 512);
+  prg32_buzzer_tone(659, step_ms, 512);
+  prg32_buzzer_tone(784, tail_ms, 512);
 #else
   prg32_splash_play_wait(duration_ms);
 #endif
