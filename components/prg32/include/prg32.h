@@ -62,7 +62,8 @@ extern "C" {
 #define PRG32_SPRITE_BPP_8 8
 
 /* Per-tile collision properties used by the platform helpers. Applications
- * may combine flags; unknown bits must remain clear for forward compatibility. */
+ * may combine flags; unknown bits must remain clear for forward compatibility.
+ */
 #define PRG32_TILE_FLAG_SOLID (1u << 0)
 #define PRG32_TILE_FLAG_PLATFORM (1u << 1)
 #define PRG32_TILE_FLAG_HAZARD (1u << 2)
@@ -250,9 +251,9 @@ typedef struct {
 /* Compact descriptors can also travel through the existing RGB565 sprite ABI.
  * uint16_t assets are naturally aligned, so bit zero remains available as a
  * format tag without changing any function prototype or animation structure. */
-#define PRG32_SPRITE_INDEXED(asset)                                           \
+#define PRG32_SPRITE_INDEXED(asset)                                            \
   ((const uint16_t *)((uintptr_t)(asset) | (uintptr_t)1u))
-#define PRG32_SPRITE_BITPLANES(asset)                                         \
+#define PRG32_SPRITE_BITPLANES(asset)                                          \
   ((const uint16_t *)((uintptr_t)(asset) | (uintptr_t)3u))
 
 typedef struct {
@@ -618,10 +619,10 @@ void prg32_sprite_draw_bitplanes(int x, int y,
  * @brief Memory statistics for the PRG32 runtime.
  *
  * NOTE: The ESP-IDF API /api/memory also supports retrieving per-task dynamic
- * heap allocations and boot memory checkpoints if you build with tracking enabled:
- * `python3 -m prg32 esp32c6 build --enable-heap-tracking`.
- * That configuration alters the heap allocator struct size and therefore cannot
- * be enabled solely from prg32 code. If enabled, the Python CLI tool will
+ * heap allocations and boot memory checkpoints if you build with tracking
+ * enabled: `python3 -m prg32 esp32c6 build --enable-heap-tracking`. That
+ * configuration alters the heap allocator struct size and therefore cannot be
+ * enabled solely from prg32 code. If enabled, the Python CLI tool will
  * automatically present a detailed dynamic memory breakdown.
  * However this option introduces overhead and should only be enabled during the
  * information collection.

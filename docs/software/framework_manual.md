@@ -1,5 +1,8 @@
 # PRG32 Framework Manual
 
+> [!NOTE]
+> This manual is intended for **users and students** writing cartridges using the provided API. It is **not** intended for developers modifying the underlying ESP-IDF C framework.
+
 PRG32 lets students write game logic in RISC-V assembly or C while a small
 framework provides hardware access.
 
