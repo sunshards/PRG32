@@ -5,21 +5,21 @@ static uint32_t tick_ms(void) {
   if (bpm == 0) {
     bpm = 120;
   }
-  // The python midi2prg32audio.py exports 24 PPQ (Ticks per beat).
-  return 60000u / ((uint32_t)bpm * 24u);
+  return 60000u / ((uint32_t)bpm * 4u);
 }
 
 static void execute_event(const prg32_audio_event_t *event) {
   switch (event->command) {
   case PRG32_AUDIO_CMD_NOTE_ON: {
     uint8_t channel = event->arg0 % CONFIG_PRG32_AUDIO_MAX_VOICES;
-    // printf("TRACKER NOTE ON: channel=%u, instrument=%u, note=%u\n",
+    // printf("TRACKER NOTE ON: channel=%u, instrument=%u, note=%u\n", channel,
+    // event->arg0, event->arg1);
     prg32_audio_note_on(channel, channel, event->arg1,
                         g_prg32_audio.channel_volume[channel]);
     break;
   }
   case PRG32_AUDIO_CMD_NOTE_OFF:
-    prg32_audio_note_off(event->arg0 % CONFIG_PRG32_AUDIO_MAX_VOICES);
+    prg32_audio_note_off(event->arg0);
     break;
   case PRG32_AUDIO_CMD_SET_VOLUME:
     prg32_audio_set_channel_volume(event->arg0, event->arg1);
@@ -90,6 +90,7 @@ void prg32_audio_tracker_step(uint32_t elapsed_ms) {
   }
   prg32_audio_track_slot_t *track = &g_prg32_audio.tracks[tracker->track_id];
   tracker->tick_accum += elapsed_ms;
+  uint32_t ms_per_tick = tick_ms();
 
   // DEBUG LOG
   static int log_div = 0;
@@ -100,18 +101,12 @@ void prg32_audio_tracker_step(uint32_t elapsed_ms) {
            (unsigned long)tracker->event_index);
   }
 
-  while (tracker->active) {
-    uint32_t ms_per_tick = tick_ms();
-    if (tracker->tick_accum < ms_per_tick) {
-      break;
-    }
-
+  while (tracker->active && tracker->tick_accum >= ms_per_tick) {
+    tracker->tick_accum -= ms_per_tick;
     if (tracker->next_delta > 0) {
-      tracker->tick_accum -= ms_per_tick;
       tracker->next_delta--;
       continue;
     }
-
     if (tracker->event_index >= track->event_count) {
       tracker->active = false;
       printf("TRACKER STOPPED: END OF TRACK\n");
@@ -124,7 +119,6 @@ void prg32_audio_tracker_step(uint32_t elapsed_ms) {
     printf("TRACKER EVENT: idx=%lu delta=%u cmd=%u arg0=%u arg1=%u\n",
            (unsigned long)(tracker->event_index - 1), event.delta_ticks,
            event.command, event.arg0, event.arg1);
-
     if (event.command == PRG32_AUDIO_CMD_JUMP) {
       uint32_t target = ((uint32_t)event.arg1 << 8) | event.arg0;
       if (target < track->event_count) {

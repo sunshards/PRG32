@@ -123,6 +123,7 @@ void prg32_audio_shutdown(void);
 const char *prg32_audio_last_error(void);
 
 prg32_audio_mode_t prg32_audio_get_mode(void);
+void prg32_audio_set_mode(prg32_audio_mode_t mode);
 int prg32_audio_is_ready(void);
 
 int prg32_audio_register_sample(uint16_t sample_id,

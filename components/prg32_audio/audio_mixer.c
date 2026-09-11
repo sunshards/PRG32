@@ -157,8 +157,11 @@ void prg32_audio_stop_all(void) {
 
 void prg32_audio_note_on(uint8_t channel, uint8_t instrument, uint8_t note,
                          uint8_t volume) {
-  prg32_audio_note_on_pan(channel, instrument, note, volume,
-                          PRG32_AUDIO_PAN_CENTER);
+  int8_t pan = PRG32_AUDIO_PAN_CENTER;
+  if (channel < CONFIG_PRG32_AUDIO_MAX_VOICES) {
+    pan = g_prg32_audio.channel_pan[channel];
+  }
+  prg32_audio_note_on_pan(channel, instrument, note, volume, pan);
 }
 
 void prg32_audio_note_on_pan(uint8_t channel, uint8_t instrument, uint8_t note,

@@ -32,7 +32,7 @@ static void audio_task(void *arg) {
       prg32_audio_voices_step(elapsed_ms);
     }
 
-    if (g_prg32_audio.config.mode == PRG32_AUDIO_MODE_STEREO) {
+    if (prg32_audio_get_mode() == PRG32_AUDIO_MODE_STEREO) {
       prg32_audio_mix_stereo(buffer, PRG32_AUDIO_MIX_FRAMES);
     } else {
       prg32_audio_mix_mono(buffer, PRG32_AUDIO_MIX_FRAMES);
@@ -41,7 +41,7 @@ static void audio_task(void *arg) {
     if (g_prg32_audio.i2s_ready) {
 #if PRG32_QEMU_AUDIO_REDIRECT
       prg32_qemu_audio_write_pcm(buffer, PRG32_AUDIO_MIX_FRAMES,
-                                 g_prg32_audio.config.mode);
+                                 prg32_audio_get_mode());
       // Block the audio task until Python sends a 1-byte ACK!
       // We use a ACK system due to QEMU fast-forwarding when idle and
       // generating audio faster than real time speed.
@@ -179,6 +179,15 @@ prg32_audio_mode_t prg32_audio_get_mode(void) {
     return PRG32_AUDIO_DEFAULT_MODE;
   }
   return g_prg32_audio.config.mode;
+}
+
+void prg32_audio_set_mode(prg32_audio_mode_t mode) {
+  if (mode != PRG32_AUDIO_MODE_MONO && mode != PRG32_AUDIO_MODE_STEREO) {
+    return;
+  }
+  prg32_audio_lock();
+  g_prg32_audio.config.mode = mode;
+  prg32_audio_unlock();
 }
 
 int prg32_audio_is_ready(void) { return g_prg32_audio.initialized ? 1 : 0; }
