@@ -168,7 +168,9 @@ static int json_array_strings_after(const char *start, const char *end,
   return out[0] ? 0 : -1;
 }
 
-static int parse_catalog(const char *json) {
+static int contains_casefold(const char *text, const char *needle);
+
+static int parse_catalog(const char *json, const char *query) {
   game_count = 0;
   if (!json || !games) {
     return 0;
@@ -195,15 +197,24 @@ static int parse_catalog(const char *json) {
     if (!*end) {
       break;
     }
-    store_game_t *g = &games[game_count];
-    memset(g, 0, sizeof(*g));
-    if (json_string_after(p, end, "id", g->id, sizeof(g->id)) == 0 &&
-        json_string_after(p, end, "title", g->title, sizeof(g->title)) == 0) {
-      json_string_after(p, end, "version", g->version, sizeof(g->version));
-      json_string_after(p, end, "summary", g->summary, sizeof(g->summary));
-      json_arches_after(p, end, g->arch, sizeof(g->arch));
-      json_array_strings_after(p, end, "tags", g->tags, sizeof(g->tags));
-      game_count++;
+    store_game_t g;
+    memset(&g, 0, sizeof(g));
+    if (json_string_after(p, end, "id", g.id, sizeof(g.id)) == 0 &&
+        json_string_after(p, end, "title", g.title, sizeof(g.title)) == 0) {
+      json_string_after(p, end, "version", g.version, sizeof(g.version));
+      json_string_after(p, end, "summary", g.summary, sizeof(g.summary));
+      json_arches_after(p, end, g.arch, sizeof(g.arch));
+      json_array_strings_after(p, end, "tags", g.tags, sizeof(g.tags));
+      
+      int matches = 1;
+      if (query && query[0]) {
+        matches = contains_casefold(g.title, query) ||
+                  contains_casefold(g.tags, query) ||
+                  contains_casefold(g.id, query);
+      }
+      if (matches) {
+        games[game_count++] = g;
+      }
     }
     p = end + 1;
   }
@@ -236,28 +247,7 @@ static int filter_catalog(const char *query) {
   if (!catalog_body || !games) {
     return 0;
   }
-  store_game_t *all_games =
-      heap_caps_malloc(STORE_MAX_GAMES * sizeof(store_game_t), MALLOC_CAP_8BIT);
-  if (!all_games) {
-    game_count = 0;
-    return 0;
-  }
-  int all_count = parse_catalog(catalog_body);
-  memcpy(all_games, games, STORE_MAX_GAMES * sizeof(store_game_t));
-  if (!query || !query[0]) {
-    heap_caps_free(all_games);
-    return all_count;
-  }
-  game_count = 0;
-  for (int i = 0; i < all_count && game_count < STORE_MAX_GAMES; ++i) {
-    if (contains_casefold(all_games[i].title, query) ||
-        contains_casefold(all_games[i].tags, query) ||
-        contains_casefold(all_games[i].id, query)) {
-      games[game_count++] = all_games[i];
-    }
-  }
-  heap_caps_free(all_games);
-  return game_count;
+  return parse_catalog(catalog_body, query);
 }
 
 static int fetch_catalog(const char *base_url, char *status,
@@ -324,7 +314,7 @@ static int fetch_catalog(const char *base_url, char *status,
   }
   esp_http_client_close(client);
   esp_http_client_cleanup(client);
-  parse_catalog(catalog_body);
+  parse_catalog(catalog_body, NULL);
   ESP_LOGI(TAG, "catalog fetch ok: status=%d content_len=%d bytes=%lu games=%d",
            http_status, content_len, (unsigned long)len, game_count);
   snprintf(status, status_len, truncated ? "first %d shown" : "OK",

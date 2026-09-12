@@ -155,9 +155,11 @@ The audio ABI is the C API exposed to cartridges:
 | `prg32_audio_play_sample_pan` | play sample with pan | channel or negative |
 | `prg32_audio_stop_channel` | stop one voice | none |
 | `prg32_audio_stop_all` | stop all voices | none |
+| `prg32_audio_note` | play a note asynchronously on a channel | none |
 | `prg32_audio_note_on` | start PCM or synth instrument note | none |
 | `prg32_audio_note_on_pan` | start PCM or synth note with pan | none |
 | `prg32_audio_note_off` | stop PCM or begin synth release | none |
+| `prg32_audio_notes` | play a blocking sequence of notes on the I2S synth. If you need asynchronous audio, consider using tracks. | none |
 | `prg32_audio_play_track` | start tracker stream | none |
 | `prg32_audio_stop_track` | stop tracker stream | none |
 | `prg32_audio_set_tempo` | set tracker BPM | none |

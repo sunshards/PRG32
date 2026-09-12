@@ -25,7 +25,7 @@ The main internal RAM consists of 512 KB of High-Performance SRAM.
 
 **IRAM vs. DRAM:**
 The HP SRAM is a unified block of memory, but it is accessed via different hardware buses depending on what the CPU is doing:
-- **IRAM (Instruction RAM):** When the CPU fetches executable code from SRAM, it uses the instruction bus. Code placed here (using the `IRAM_ATTR` macro) executes significantly faster than code in Flash and is essential for interrupt handlers (ISRs).
+- **IRAM (Instruction RAM):** When the CPU fetches executable code from SRAM, it uses the instruction bus. Code placed here (using the `IRAM_ATTR` macro) executes significantly faster than code in Flash and is essential for interrupt handlers (ISRs). The executable cartridge buffer `prg32_cart_exec` is explicitly placed in the `.iram1.data` section with 16-byte alignment (`__attribute__((aligned(16)))`) so uploaded games run from this high-speed memory.
 - **DRAM (Data RAM):** When the CPU reads or writes variables, it uses the data bus. The exact same physical SRAM is treated as DRAM when accessed this way. 
 
 #### LP SRAM (Low-Power SRAM)
